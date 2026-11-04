@@ -4,4 +4,6 @@
     <string name="clock_widget_description">Scalloped Material You clock and date widget with dynamic wallpaper colors</string>
     <string name="weather_widget_name">Material You Weather</string>
     <string name="weather_widget_description">Dynamic Material You weather conditions and hourly forecast widget</string>
+    <string name="music_widget_name">Material You Music</string>
+    <string name="music_widget_description">Expressive Material You media player widget with dynamic theme colors</string>
 </resources>

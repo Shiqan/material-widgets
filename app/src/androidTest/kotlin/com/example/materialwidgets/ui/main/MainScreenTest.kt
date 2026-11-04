@@ -18,8 +18,11 @@ class MainScreenTest {
   }
 
   @Test
-  fun firstItem_exists() {
-    FAKE_DATA.forEach { composeTestRule.onNodeWithText("Hello $it!").assertExists() }
+  fun widgetGalleryCards_exist() {
+    composeTestRule.onNodeWithText("Material You Dynamic Color").assertExists()
+    composeTestRule.onNodeWithText("Material You Clock").assertExists()
+    composeTestRule.onNodeWithText("Material You Weather").assertExists()
+    composeTestRule.onNodeWithText("Material You Music").assertExists()
   }
 }
 
