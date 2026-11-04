@@ -216,6 +216,7 @@ class PlayPauseMusicAction : ActionCallback {
             prefs[MusicAppWidget.KEY_IS_PLAYING] = !current
         }
         MusicAppWidget().update(context, glanceId)
+        MusicPillAppWidget().update(context, glanceId)
     }
 }
 
@@ -239,6 +240,7 @@ class NextTrackMusicAction : ActionCallback {
             prefs[MusicAppWidget.KEY_IS_PLAYING] = true
         }
         MusicAppWidget().update(context, glanceId)
+        MusicPillAppWidget().update(context, glanceId)
     }
 }
 
@@ -262,6 +264,7 @@ class PreviousTrackMusicAction : ActionCallback {
             prefs[MusicAppWidget.KEY_IS_PLAYING] = true
         }
         MusicAppWidget().update(context, glanceId)
+        MusicPillAppWidget().update(context, glanceId)
     }
 }
 

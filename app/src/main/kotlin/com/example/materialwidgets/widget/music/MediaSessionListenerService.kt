@@ -186,23 +186,28 @@ object MediaSessionControllerHelper {
             false
         }
 
-        val glanceIds = GlanceAppWidgetManager(context).getGlanceIds(MusicAppWidget::class.java)
-        val widget = MusicAppWidget()
-        for (glanceId in glanceIds) {
-            updateAppWidgetState(context, glanceId) { prefs ->
-                prefs[MusicAppWidget.KEY_HAS_LIVE_SESSION] = true
-                prefs[MusicAppWidget.KEY_LIVE_TITLE] = title
-                prefs[MusicAppWidget.KEY_LIVE_ARTIST] = artist
-                prefs[MusicAppWidget.KEY_LIVE_ALBUM] = album
-                prefs[MusicAppWidget.KEY_LIVE_ELAPSED] = formatDurationMs(positionMs)
-                prefs[MusicAppWidget.KEY_LIVE_DURATION] = if (durationMs > 0L) formatDurationMs(durationMs) else "--:--"
-                prefs[MusicAppWidget.KEY_LIVE_PROGRESS] = progress
-                prefs[MusicAppWidget.KEY_LIVE_PACKAGE] = controller.packageName
-                prefs[MusicAppWidget.KEY_HAS_ALBUM_ART] = hasArt
-                prefs[MusicAppWidget.KEY_IS_PLAYING] = isPlaying
-                prefs[MusicAppWidget.KEY_ART_REVISION] = (prefs[MusicAppWidget.KEY_ART_REVISION] ?: 0) + 1
+        val manager = GlanceAppWidgetManager(context)
+        val musicWidgets = listOf(
+            MusicAppWidget() to manager.getGlanceIds(MusicAppWidget::class.java),
+            MusicPillAppWidget() to manager.getGlanceIds(MusicPillAppWidget::class.java),
+        )
+        for ((widget, glanceIds) in musicWidgets) {
+            for (glanceId in glanceIds) {
+                updateAppWidgetState(context, glanceId) { prefs ->
+                    prefs[MusicAppWidget.KEY_HAS_LIVE_SESSION] = true
+                    prefs[MusicAppWidget.KEY_LIVE_TITLE] = title
+                    prefs[MusicAppWidget.KEY_LIVE_ARTIST] = artist
+                    prefs[MusicAppWidget.KEY_LIVE_ALBUM] = album
+                    prefs[MusicAppWidget.KEY_LIVE_ELAPSED] = formatDurationMs(positionMs)
+                    prefs[MusicAppWidget.KEY_LIVE_DURATION] = if (durationMs > 0L) formatDurationMs(durationMs) else "--:--"
+                    prefs[MusicAppWidget.KEY_LIVE_PROGRESS] = progress
+                    prefs[MusicAppWidget.KEY_LIVE_PACKAGE] = controller.packageName
+                    prefs[MusicAppWidget.KEY_HAS_ALBUM_ART] = hasArt
+                    prefs[MusicAppWidget.KEY_IS_PLAYING] = isPlaying
+                    prefs[MusicAppWidget.KEY_ART_REVISION] = (prefs[MusicAppWidget.KEY_ART_REVISION] ?: 0) + 1
+                }
+                widget.update(context, glanceId)
             }
-            widget.update(context, glanceId)
         }
         return true
     }

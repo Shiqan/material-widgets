@@ -34,4 +34,14 @@
     <dimen name="music_widget_min_resize_height">115dp</dimen>
     <dimen name="music_widget_max_resize_width">624dp</dimen>
     <dimen name="music_widget_max_resize_height">320dp</dimen>
+
+    <!-- Music Pill widget (4x1 stadium capsule bar) -->
+    <integer name="music_pill_widget_target_cell_width">4</integer>
+    <integer name="music_pill_widget_target_cell_height">1</integer>
+    <dimen name="music_pill_widget_min_width">256dp</dimen>
+    <dimen name="music_pill_widget_min_height">56dp</dimen>
+    <dimen name="music_pill_widget_min_resize_width">180dp</dimen>
+    <dimen name="music_pill_widget_min_resize_height">52dp</dimen>
+    <dimen name="music_pill_widget_max_resize_width">624dp</dimen>
+    <dimen name="music_pill_widget_max_resize_height">120dp</dimen>
 </resources>

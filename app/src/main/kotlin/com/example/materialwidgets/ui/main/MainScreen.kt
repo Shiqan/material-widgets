@@ -69,6 +69,7 @@ import com.example.materialwidgets.ui.theme.MaterialWidgetsTheme
 import com.example.materialwidgets.widget.clock.ClockAppWidgetReceiver
 import com.example.materialwidgets.widget.music.MediaSessionControllerHelper
 import com.example.materialwidgets.widget.music.MusicAppWidgetReceiver
+import com.example.materialwidgets.widget.music.MusicPillAppWidgetReceiver
 import com.example.materialwidgets.widget.weather.WeatherAppWidgetReceiver
 
 @Composable
@@ -172,6 +173,22 @@ internal fun MainScreen(data: List<String>, modifier: Modifier = Modifier) {
                         requestPinAppWidget(
                             context = context,
                             receiverClass = MusicAppWidgetReceiver::class.java,
+                        )
+                    },
+                )
+            }
+
+            item {
+                WidgetGalleryCard(
+                    title = stringResource(R.string.music_pill_widget_name),
+                    subtitle = "Compact 4x1 Stadium Bar • Circular Art, Nested Pill & Scalloped Play Button",
+                    icon = Icons.Rounded.MusicNote,
+                    containerColor = MaterialTheme.colorScheme.inverseSurface,
+                    contentColor = MaterialTheme.colorScheme.inverseOnSurface,
+                    onPinClick = {
+                        requestPinAppWidget(
+                            context = context,
+                            receiverClass = MusicPillAppWidgetReceiver::class.java,
                         )
                     },
                 )

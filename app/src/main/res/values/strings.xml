@@ -6,4 +6,6 @@
     <string name="weather_widget_description">Dynamic Material You weather conditions and hourly forecast widget</string>
     <string name="music_widget_name">Material You Music</string>
     <string name="music_widget_description">Expressive Material You media player widget with dynamic theme colors</string>
+    <string name="music_pill_widget_name">Material You Music Pill</string>
+    <string name="music_pill_widget_description">Compact 4x1 stadium pill music bar with scalloped play badge and nested transport capsule</string>
 </resources>
