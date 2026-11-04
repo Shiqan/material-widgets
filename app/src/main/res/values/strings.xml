@@ -2,4 +2,6 @@
     <string name="app_name">Material Widgets</string>
     <string name="clock_widget_name">Material You Clock</string>
     <string name="clock_widget_description">Scalloped Material You clock and date widget with dynamic wallpaper colors</string>
+    <string name="weather_widget_name">Material You Weather</string>
+    <string name="weather_widget_description">Dynamic Material You weather conditions and hourly forecast widget</string>
 </resources>
