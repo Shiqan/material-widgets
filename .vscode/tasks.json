@@ -1,0 +1,53 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Android: Start Emulator (pixel_7)",
+      "type": "shell",
+      "command": "android emulator start pixel_7",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      }
+    },
+    {
+      "label": "Android: Build & Run App on Emulator",
+      "type": "shell",
+      "command": "android run",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Android: Launch Emulator + Run App",
+      "dependsOrder": "sequence",
+      "dependsOn": [
+        "Android: Start Emulator (pixel_7)",
+        "Android: Build & Run App on Emulator"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "Gradle: Install Debug APK",
+      "type": "shell",
+      "command": "./gradlew assembleDebug installDebug",
+      "windows": {
+        "command": ".\\gradlew.bat assembleDebug installDebug"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Android: Stop Emulator (pixel_7)",
+      "type": "shell",
+      "command": "android emulator stop pixel_7",
+      "problemMatcher": []
+    }
+  ]
+}
