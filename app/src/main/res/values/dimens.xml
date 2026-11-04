@@ -44,4 +44,24 @@
     <dimen name="music_pill_widget_min_resize_height">52dp</dimen>
     <dimen name="music_pill_widget_max_resize_width">624dp</dimen>
     <dimen name="music_pill_widget_max_resize_height">120dp</dimen>
+
+    <!-- Calendar & Time widgets (2x2 default) -->
+    <integer name="calendar_widget_target_cell_width">2</integer>
+    <integer name="calendar_widget_target_cell_height">2</integer>
+    <dimen name="calendar_widget_min_width">120dp</dimen>
+    <dimen name="calendar_widget_min_height">115dp</dimen>
+    <dimen name="calendar_widget_min_resize_width">110dp</dimen>
+    <dimen name="calendar_widget_min_resize_height">110dp</dimen>
+    <dimen name="calendar_widget_max_resize_width">320dp</dimen>
+    <dimen name="calendar_widget_max_resize_height">320dp</dimen>
+
+    <!-- Quick Toggle 1x1 Single Button widgets (Wi-Fi, Data, Flashlight, Rotate) -->
+    <integer name="quick_toggle_single_target_cell_width">1</integer>
+    <integer name="quick_toggle_single_target_cell_height">1</integer>
+    <dimen name="quick_toggle_single_min_width">56dp</dimen>
+    <dimen name="quick_toggle_single_min_height">56dp</dimen>
+    <dimen name="quick_toggle_single_min_resize_width">48dp</dimen>
+    <dimen name="quick_toggle_single_min_resize_height">48dp</dimen>
+    <dimen name="quick_toggle_single_max_resize_width">180dp</dimen>
+    <dimen name="quick_toggle_single_max_resize_height">180dp</dimen>
 </resources>

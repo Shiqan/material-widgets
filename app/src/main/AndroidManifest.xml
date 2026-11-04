@@ -73,6 +73,78 @@
                 android:resource="@xml/music_pill_widget_info" />
         </receiver>
 
+        <receiver
+            android:name=".widget.calendar.CalendarCardAppWidgetReceiver"
+            android:exported="true"
+            android:label="@string/calendar_card_widget_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/calendar_card_widget_info" />
+        </receiver>
+
+        <receiver
+            android:name=".widget.calendar.CircleClockAppWidgetReceiver"
+            android:exported="true"
+            android:label="@string/circle_clock_widget_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/circle_clock_widget_info" />
+        </receiver>
+
+        <receiver
+            android:name=".widget.toggles.WifiToggleAppWidgetReceiver"
+            android:exported="true"
+            android:label="@string/wifi_toggle_widget_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/wifi_toggle_widget_info" />
+        </receiver>
+
+        <receiver
+            android:name=".widget.toggles.DataToggleAppWidgetReceiver"
+            android:exported="true"
+            android:label="@string/data_toggle_widget_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/data_toggle_widget_info" />
+        </receiver>
+
+        <receiver
+            android:name=".widget.toggles.FlashlightToggleAppWidgetReceiver"
+            android:exported="true"
+            android:label="@string/flashlight_toggle_widget_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/flashlight_toggle_widget_info" />
+        </receiver>
+
+        <receiver
+            android:name=".widget.toggles.RotateToggleAppWidgetReceiver"
+            android:exported="true"
+            android:label="@string/rotate_toggle_widget_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/rotate_toggle_widget_info" />
+        </receiver>
+
         <service
             android:name=".widget.music.MediaSessionListenerService"
             android:exported="true"

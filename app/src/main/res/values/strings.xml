@@ -8,4 +8,16 @@
     <string name="music_widget_description">Expressive Material You media player widget with dynamic theme colors</string>
     <string name="music_pill_widget_name">Material You Music Pill</string>
     <string name="music_pill_widget_description">Compact 4x1 stadium pill music bar with scalloped play badge and nested transport capsule</string>
+    <string name="calendar_card_widget_name">Material You Date Card</string>
+    <string name="calendar_card_widget_description">3-day strip calendar card with scalloped today badge, month, and year</string>
+    <string name="circle_clock_widget_name">Material You Circle Clock</string>
+    <string name="circle_clock_widget_description">Circular clock &amp; date widget with diagonal time pill</string>
+    <string name="wifi_toggle_widget_name">Quick Button: Wi-Fi</string>
+    <string name="wifi_toggle_widget_description">Scalloped Material You Wi-Fi toggle button widget</string>
+    <string name="data_toggle_widget_name">Quick Button: Mobile Data</string>
+    <string name="data_toggle_widget_description">Circular Material You Mobile Data toggle button widget</string>
+    <string name="flashlight_toggle_widget_name">Quick Button: Flashlight</string>
+    <string name="flashlight_toggle_widget_description">Circular Material You Torch / Flashlight toggle button widget</string>
+    <string name="rotate_toggle_widget_name">Quick Button: Auto-Rotate</string>
+    <string name="rotate_toggle_widget_description">Scalloped Material You Screen Auto-Rotate toggle button widget</string>
 </resources>

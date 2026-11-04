@@ -25,11 +25,16 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AccessTime
 import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.CalendarMonth
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.Cloud
+import androidx.compose.material.icons.rounded.FlashlightOn
 import androidx.compose.material.icons.rounded.MusicNote
 import androidx.compose.material.icons.rounded.NotificationsActive
 import androidx.compose.material.icons.rounded.Palette
+import androidx.compose.material.icons.rounded.ScreenRotation
+import androidx.compose.material.icons.rounded.SwapVert
+import androidx.compose.material.icons.rounded.Wifi
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -66,10 +71,16 @@ import androidx.navigation3.runtime.NavKey
 import com.example.materialwidgets.R
 import com.example.materialwidgets.data.DefaultDataRepository
 import com.example.materialwidgets.ui.theme.MaterialWidgetsTheme
+import com.example.materialwidgets.widget.calendar.CalendarCardAppWidgetReceiver
+import com.example.materialwidgets.widget.calendar.CircleClockAppWidgetReceiver
 import com.example.materialwidgets.widget.clock.ClockAppWidgetReceiver
 import com.example.materialwidgets.widget.music.MediaSessionControllerHelper
 import com.example.materialwidgets.widget.music.MusicAppWidgetReceiver
 import com.example.materialwidgets.widget.music.MusicPillAppWidgetReceiver
+import com.example.materialwidgets.widget.toggles.DataToggleAppWidgetReceiver
+import com.example.materialwidgets.widget.toggles.FlashlightToggleAppWidgetReceiver
+import com.example.materialwidgets.widget.toggles.RotateToggleAppWidgetReceiver
+import com.example.materialwidgets.widget.toggles.WifiToggleAppWidgetReceiver
 import com.example.materialwidgets.widget.weather.WeatherAppWidgetReceiver
 
 @Composable
@@ -148,6 +159,38 @@ internal fun MainScreen(data: List<String>, modifier: Modifier = Modifier) {
 
             item {
                 WidgetGalleryCard(
+                    title = stringResource(R.string.calendar_card_widget_name),
+                    subtitle = "3-Day Strip Calendar Card (2x2) • Scalloped Today Badge, Month & Year",
+                    icon = Icons.Rounded.CalendarMonth,
+                    containerColor = MaterialTheme.colorScheme.inverseSurface,
+                    contentColor = MaterialTheme.colorScheme.inverseOnSurface,
+                    onPinClick = {
+                        requestPinAppWidget(
+                            context = context,
+                            receiverClass = CalendarCardAppWidgetReceiver::class.java,
+                        )
+                    },
+                )
+            }
+
+            item {
+                WidgetGalleryCard(
+                    title = stringResource(R.string.circle_clock_widget_name),
+                    subtitle = "Circular Clock & Date (2x2) • Day-of-Week, Time Pill & Date Strip",
+                    icon = Icons.Rounded.AccessTime,
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                    onPinClick = {
+                        requestPinAppWidget(
+                            context = context,
+                            receiverClass = CircleClockAppWidgetReceiver::class.java,
+                        )
+                    },
+                )
+            }
+
+            item {
+                WidgetGalleryCard(
                     title = stringResource(R.string.weather_widget_name),
                     subtitle = "Compact Tile (2x2) & Hourly Forecast Card (4x2) • °C/°F Toggle",
                     icon = Icons.Rounded.Cloud,
@@ -189,6 +232,70 @@ internal fun MainScreen(data: List<String>, modifier: Modifier = Modifier) {
                         requestPinAppWidget(
                             context = context,
                             receiverClass = MusicPillAppWidgetReceiver::class.java,
+                        )
+                    },
+                )
+            }
+
+            item {
+                WidgetGalleryCard(
+                    title = stringResource(R.string.wifi_toggle_widget_name),
+                    subtitle = "1x1 Scalloped Cookie Button • Opens Wi-Fi Quick Settings Panel",
+                    icon = Icons.Rounded.Wifi,
+                    containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+                    onPinClick = {
+                        requestPinAppWidget(
+                            context = context,
+                            receiverClass = WifiToggleAppWidgetReceiver::class.java,
+                        )
+                    },
+                )
+            }
+
+            item {
+                WidgetGalleryCard(
+                    title = stringResource(R.string.data_toggle_widget_name),
+                    subtitle = "1x1 Circular Button • Opens Mobile Data / Internet Panel",
+                    icon = Icons.Rounded.SwapVert,
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                    onPinClick = {
+                        requestPinAppWidget(
+                            context = context,
+                            receiverClass = DataToggleAppWidgetReceiver::class.java,
+                        )
+                    },
+                )
+            }
+
+            item {
+                WidgetGalleryCard(
+                    title = stringResource(R.string.flashlight_toggle_widget_name),
+                    subtitle = "1x1 Circular Button • Toggles Camera Torch On/Off",
+                    icon = Icons.Rounded.FlashlightOn,
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    onPinClick = {
+                        requestPinAppWidget(
+                            context = context,
+                            receiverClass = FlashlightToggleAppWidgetReceiver::class.java,
+                        )
+                    },
+                )
+            }
+
+            item {
+                WidgetGalleryCard(
+                    title = stringResource(R.string.rotate_toggle_widget_name),
+                    subtitle = "1x1 Scalloped Badge Button • Toggles Screen Auto-Rotation",
+                    icon = Icons.Rounded.ScreenRotation,
+                    containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+                    onPinClick = {
+                        requestPinAppWidget(
+                            context = context,
+                            receiverClass = RotateToggleAppWidgetReceiver::class.java,
                         )
                     },
                 )
