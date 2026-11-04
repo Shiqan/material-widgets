@@ -14,7 +14,7 @@
     {
       "label": "Android: Build & Run App on Emulator",
       "type": "shell",
-      "command": "android run",
+      "command": "android run \"app?\"",
       "group": {
         "kind": "build",
         "isDefault": true
@@ -35,11 +35,11 @@
       "problemMatcher": []
     },
     {
-      "label": "Gradle: Install Debug APK",
+      "label": "Gradle: Install & Launch Debug APK",
       "type": "shell",
-      "command": "./gradlew assembleDebug installDebug",
+      "command": "./gradlew installDebug && adb shell am start -n com.example.materialwidgets/.MainActivity",
       "windows": {
-        "command": ".\\gradlew.bat assembleDebug installDebug"
+        "command": ".\\gradlew.bat installDebug; adb shell am start -n com.example.materialwidgets/.MainActivity"
       },
       "problemMatcher": []
     },
