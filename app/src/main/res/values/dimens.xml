@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="widget_margin">0dp</dimen>
+    <dimen name="widget_element_min_length">48dp</dimen>
+    <dimen name="widget_corner_radius">28dp</dimen>
+    <dimen name="widget_inner_corner_radius">16dp</dimen>
+
+    <!-- Clock widget (2x2 default, resizable 2x1 to 4x4) -->
+    <integer name="clock_widget_target_cell_width">2</integer>
+    <integer name="clock_widget_target_cell_height">2</integer>
+    <dimen name="clock_widget_min_width">120dp</dimen>
+    <dimen name="clock_widget_min_height">115dp</dimen>
+    <dimen name="clock_widget_min_resize_width">110dp</dimen>
+    <dimen name="clock_widget_min_resize_height">56dp</dimen>
+    <dimen name="clock_widget_max_resize_width">624dp</dimen>
+    <dimen name="clock_widget_max_resize_height">422dp</dimen>
+
+    <!-- Weather widget (2x2 default, resizable 2x2 to 4x3) -->
+    <integer name="weather_widget_target_cell_width">2</integer>
+    <integer name="weather_widget_target_cell_height">2</integer>
+    <dimen name="weather_widget_min_width">120dp</dimen>
+    <dimen name="weather_widget_min_height">115dp</dimen>
+    <dimen name="weather_widget_min_resize_width">120dp</dimen>
+    <dimen name="weather_widget_min_resize_height">115dp</dimen>
+    <dimen name="weather_widget_max_resize_width">624dp</dimen>
+    <dimen name="weather_widget_max_resize_height">320dp</dimen>
+
+    <!-- Music widget (4x2 default, resizable 2x2 to 4x3) -->
+    <integer name="music_widget_target_cell_width">4</integer>
+    <integer name="music_widget_target_cell_height">2</integer>
+    <dimen name="music_widget_min_width">256dp</dimen>
+    <dimen name="music_widget_min_height">115dp</dimen>
+    <dimen name="music_widget_min_resize_width">120dp</dimen>
+    <dimen name="music_widget_min_resize_height">115dp</dimen>
+    <dimen name="music_widget_max_resize_width">624dp</dimen>
+    <dimen name="music_widget_max_resize_height">320dp</dimen>
+</resources>
