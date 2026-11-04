@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:description="@string/calendar_card_widget_description"
+    android:initialLayout="@layout/glance_default_loading_layout"
+    android:maxResizeHeight="@dimen/calendar_widget_max_resize_height"
+    android:maxResizeWidth="@dimen/calendar_widget_max_resize_width"
+    android:minHeight="@dimen/calendar_widget_min_height"
+    android:minResizeHeight="@dimen/calendar_widget_min_resize_height"
+    android:minResizeWidth="@dimen/calendar_widget_min_resize_width"
+    android:minWidth="@dimen/calendar_widget_min_width"
+    android:resizeMode="horizontal|vertical"
+    android:targetCellHeight="@integer/calendar_widget_target_cell_height"
+    android:targetCellWidth="@integer/calendar_widget_target_cell_width"
+    android:updatePeriodMillis="1800000"
+    android:widgetCategory="home_screen|keyguard" />
