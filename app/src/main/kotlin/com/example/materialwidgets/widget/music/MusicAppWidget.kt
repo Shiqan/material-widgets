@@ -1,12 +1,15 @@
 package com.example.materialwidgets.widget.music
 
 import android.content.Context
+import android.graphics.Bitmap
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.glance.ColorFilter
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
@@ -31,6 +34,7 @@ import androidx.glance.currentState
 import androidx.glance.layout.Alignment
 import androidx.glance.layout.Box
 import androidx.glance.layout.Column
+import androidx.glance.layout.ContentScale
 import androidx.glance.layout.Row
 import androidx.glance.layout.Spacer
 import androidx.glance.layout.fillMaxHeight
@@ -49,7 +53,10 @@ import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import com.example.materialwidgets.R
 import com.example.materialwidgets.widget.theme.MaterialYouGlanceTheme
+import com.example.materialwidgets.widget.util.decodeDownsampledWidgetBitmap
 import com.example.materialwidgets.widget.util.showWidgetErrorFallback
+import kotlinx.coroutines.delay
+import java.io.File
 
 data class MusicTrack(
     val title: String,
@@ -58,6 +65,7 @@ data class MusicTrack(
     val elapsedLabel: String,
     val durationLabel: String,
     val progress: Float,
+    val isLiveSession: Boolean = false,
 )
 
 val SAMPLE_MUSIC_QUEUE = listOf(
@@ -96,15 +104,64 @@ class MusicAppWidget : GlanceAppWidget() {
     override val sizeMode: SizeMode = SizeMode.Exact
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
+        // Attempt an initial sync from any active system MediaSession (e.g. Spotify, YouTube Music)
+        MediaSessionControllerHelper.syncFromActiveSession(context)
+
+        val artFile = File(context.filesDir, MediaSessionControllerHelper.ALBUM_ART_FILENAME)
+        var cachedRevision = -1
+        var cachedAlbumArt: Bitmap? = decodeDownsampledWidgetBitmap(
+            context = context,
+            sourceFile = artFile,
+            distinctImageCount = 1,
+            maxWidthDp = 128,
+            maxHeightDp = 128,
+            config = Bitmap.Config.RGB_565,
+        )
+
         provideContent {
             val prefs = currentState<Preferences>()
-            val trackIndex = (prefs[KEY_TRACK_INDEX] ?: 0).mod(SAMPLE_MUSIC_QUEUE.size)
+            val hasLive = prefs[KEY_HAS_LIVE_SESSION] ?: false
+            val hasArt = prefs[KEY_HAS_ALBUM_ART] ?: false
+            val revision = prefs[KEY_ART_REVISION] ?: 0
+
+            if (revision != cachedRevision) {
+                cachedRevision = revision
+                cachedAlbumArt = if (hasArt) {
+                    decodeDownsampledWidgetBitmap(
+                        context = context,
+                        sourceFile = artFile,
+                        distinctImageCount = 1,
+                        maxWidthDp = 128,
+                        maxHeightDp = 128,
+                        config = Bitmap.Config.RGB_565,
+                    )
+                } else {
+                    null
+                }
+            }
+
+            val track = if (hasLive && !prefs[KEY_LIVE_TITLE].isNullOrBlank()) {
+                MusicTrack(
+                    title = prefs[KEY_LIVE_TITLE] ?: "Unknown Track",
+                    artist = prefs[KEY_LIVE_ARTIST] ?: "Unknown Artist",
+                    album = prefs[KEY_LIVE_ALBUM] ?: "",
+                    elapsedLabel = prefs[KEY_LIVE_ELAPSED] ?: "0:00",
+                    durationLabel = prefs[KEY_LIVE_DURATION] ?: "--:--",
+                    progress = prefs[KEY_LIVE_PROGRESS] ?: 0f,
+                    isLiveSession = true,
+                )
+            } else {
+                val trackIndex = (prefs[KEY_TRACK_INDEX] ?: 0).mod(SAMPLE_MUSIC_QUEUE.size)
+                SAMPLE_MUSIC_QUEUE[trackIndex]
+            }
+
             val isPlaying = prefs[KEY_IS_PLAYING] ?: true
             val isFavorite = prefs[KEY_IS_FAVORITE] ?: false
 
             MaterialYouGlanceTheme {
                 MusicWidgetContent(
-                    track = SAMPLE_MUSIC_QUEUE[trackIndex],
+                    track = track,
+                    albumArtBitmap = cachedAlbumArt,
                     isPlaying = isPlaying,
                     isFavorite = isFavorite,
                 )
@@ -125,6 +182,17 @@ class MusicAppWidget : GlanceAppWidget() {
         val KEY_TRACK_INDEX = intPreferencesKey("music_track_index")
         val KEY_IS_PLAYING = booleanPreferencesKey("music_is_playing")
         val KEY_IS_FAVORITE = booleanPreferencesKey("music_is_favorite")
+
+        val KEY_HAS_LIVE_SESSION = booleanPreferencesKey("music_has_live_session")
+        val KEY_LIVE_TITLE = stringPreferencesKey("music_live_title")
+        val KEY_LIVE_ARTIST = stringPreferencesKey("music_live_artist")
+        val KEY_LIVE_ALBUM = stringPreferencesKey("music_live_album")
+        val KEY_LIVE_ELAPSED = stringPreferencesKey("music_live_elapsed")
+        val KEY_LIVE_DURATION = stringPreferencesKey("music_live_duration")
+        val KEY_LIVE_PROGRESS = floatPreferencesKey("music_live_progress")
+        val KEY_LIVE_PACKAGE = stringPreferencesKey("music_live_package")
+        val KEY_HAS_ALBUM_ART = booleanPreferencesKey("music_has_album_art")
+        val KEY_ART_REVISION = intPreferencesKey("music_art_revision")
     }
 }
 
@@ -134,6 +202,15 @@ class PlayPauseMusicAction : ActionCallback {
         glanceId: GlanceId,
         parameters: ActionParameters,
     ) {
+        val hasController = MediaSessionControllerHelper.getPrimaryMediaController(context) != null
+        if (hasController) {
+            MediaSessionControllerHelper.togglePlayPause(context)
+            delay(250)
+            if (MediaSessionControllerHelper.syncFromActiveSession(context)) return
+        } else {
+            // Also dispatch system media key in case a player is paused in background
+            MediaSessionControllerHelper.togglePlayPause(context)
+        }
         updateAppWidgetState(context, glanceId) { prefs ->
             val current = prefs[MusicAppWidget.KEY_IS_PLAYING] ?: true
             prefs[MusicAppWidget.KEY_IS_PLAYING] = !current
@@ -148,6 +225,14 @@ class NextTrackMusicAction : ActionCallback {
         glanceId: GlanceId,
         parameters: ActionParameters,
     ) {
+        val hasController = MediaSessionControllerHelper.getPrimaryMediaController(context) != null
+        if (hasController) {
+            MediaSessionControllerHelper.skipToNext(context)
+            delay(350)
+            if (MediaSessionControllerHelper.syncFromActiveSession(context)) return
+        } else {
+            MediaSessionControllerHelper.skipToNext(context)
+        }
         updateAppWidgetState(context, glanceId) { prefs ->
             val current = prefs[MusicAppWidget.KEY_TRACK_INDEX] ?: 0
             prefs[MusicAppWidget.KEY_TRACK_INDEX] = (current + 1).mod(SAMPLE_MUSIC_QUEUE.size)
@@ -163,6 +248,14 @@ class PreviousTrackMusicAction : ActionCallback {
         glanceId: GlanceId,
         parameters: ActionParameters,
     ) {
+        val hasController = MediaSessionControllerHelper.getPrimaryMediaController(context) != null
+        if (hasController) {
+            MediaSessionControllerHelper.skipToPrevious(context)
+            delay(350)
+            if (MediaSessionControllerHelper.syncFromActiveSession(context)) return
+        } else {
+            MediaSessionControllerHelper.skipToPrevious(context)
+        }
         updateAppWidgetState(context, glanceId) { prefs ->
             val current = prefs[MusicAppWidget.KEY_TRACK_INDEX] ?: 0
             prefs[MusicAppWidget.KEY_TRACK_INDEX] = (current - 1).mod(SAMPLE_MUSIC_QUEUE.size)
@@ -189,6 +282,7 @@ class ToggleFavoriteMusicAction : ActionCallback {
 @Composable
 fun MusicWidgetContent(
     track: MusicTrack,
+    albumArtBitmap: Bitmap? = null,
     isPlaying: Boolean = true,
     isFavorite: Boolean = false,
 ) {
@@ -207,31 +301,50 @@ fun MusicWidgetContent(
                 .padding(14.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            // Scalloped Vinyl / Album Art Medallion
             val artSize = (size.height - 28.dp).coerceAtMost(112.dp)
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = GlanceModifier
-                    .size(artSize)
-                    .background(
-                        imageProvider = ImageProvider(R.drawable.bg_scalloped_cookie),
-                        colorFilter = ColorFilter.tint(GlanceTheme.colors.tertiaryContainer),
-                    )
-                    .clickable(actionRunCallback<PlayPauseMusicAction>()),
-            ) {
+            if (albumArtBitmap != null) {
                 Box(
                     contentAlignment = Alignment.Center,
                     modifier = GlanceModifier
-                        .size(44.dp)
-                        .background(GlanceTheme.colors.primary)
-                        .cornerRadius(22.dp),
+                        .size(artSize)
+                        .cornerRadius(24.dp)
+                        .clickable(actionRunCallback<PlayPauseMusicAction>()),
                 ) {
                     Image(
-                        provider = ImageProvider(R.drawable.ic_music_note),
+                        provider = ImageProvider(albumArtBitmap),
                         contentDescription = track.album,
-                        colorFilter = ColorFilter.tint(GlanceTheme.colors.onPrimary),
-                        modifier = GlanceModifier.size(24.dp),
+                        contentScale = ContentScale.Crop,
+                        modifier = GlanceModifier
+                            .fillMaxSize()
+                            .cornerRadius(24.dp),
                     )
+                }
+            } else {
+                // Scalloped Vinyl / Album Art Medallion
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = GlanceModifier
+                        .size(artSize)
+                        .background(
+                            imageProvider = ImageProvider(R.drawable.bg_scalloped_cookie),
+                            colorFilter = ColorFilter.tint(GlanceTheme.colors.tertiaryContainer),
+                        )
+                        .clickable(actionRunCallback<PlayPauseMusicAction>()),
+                ) {
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = GlanceModifier
+                            .size(44.dp)
+                            .background(GlanceTheme.colors.primary)
+                            .cornerRadius(22.dp),
+                    ) {
+                        Image(
+                            provider = ImageProvider(R.drawable.ic_music_note),
+                            contentDescription = track.album,
+                            colorFilter = ColorFilter.tint(GlanceTheme.colors.onPrimary),
+                            modifier = GlanceModifier.size(24.dp),
+                        )
+                    }
                 }
             }
 
@@ -258,8 +371,13 @@ fun MusicWidgetContent(
                             ),
                             maxLines = 1,
                         )
+                        val subtitle = if (track.album.isNotBlank()) {
+                            "${track.artist} • ${track.album}"
+                        } else {
+                            track.artist
+                        }
                         Text(
-                            text = "${track.artist} • ${track.album}",
+                            text = subtitle,
                             style = TextStyle(
                                 color = GlanceTheme.colors.primary,
                                 fontSize = 12.sp,
@@ -391,21 +509,32 @@ fun MusicWidgetContent(
                 modifier = GlanceModifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = GlanceModifier
-                        .size(40.dp)
-                        .background(
-                            imageProvider = ImageProvider(R.drawable.bg_scalloped_cookie),
-                            colorFilter = ColorFilter.tint(GlanceTheme.colors.tertiaryContainer),
-                        ),
-                ) {
+                if (albumArtBitmap != null) {
                     Image(
-                        provider = ImageProvider(R.drawable.ic_music_note),
+                        provider = ImageProvider(albumArtBitmap),
                         contentDescription = null,
-                        colorFilter = ColorFilter.tint(GlanceTheme.colors.onTertiaryContainer),
-                        modifier = GlanceModifier.size(20.dp),
+                        contentScale = ContentScale.Crop,
+                        modifier = GlanceModifier
+                            .size(40.dp)
+                            .cornerRadius(14.dp),
                     )
+                } else {
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = GlanceModifier
+                            .size(40.dp)
+                            .background(
+                                imageProvider = ImageProvider(R.drawable.bg_scalloped_cookie),
+                                colorFilter = ColorFilter.tint(GlanceTheme.colors.tertiaryContainer),
+                            ),
+                    ) {
+                        Image(
+                            provider = ImageProvider(R.drawable.ic_music_note),
+                            contentDescription = null,
+                            colorFilter = ColorFilter.tint(GlanceTheme.colors.onTertiaryContainer),
+                            modifier = GlanceModifier.size(20.dp),
+                        )
+                    }
                 }
 
                 Spacer(modifier = GlanceModifier.defaultWeight())

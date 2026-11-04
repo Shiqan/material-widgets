@@ -3,7 +3,9 @@ package com.example.materialwidgets.ui.main
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.content.Context
+import android.content.Intent
 import android.os.Build
+import android.provider.Settings
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -23,8 +25,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AccessTime
 import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.Cloud
 import androidx.compose.material.icons.rounded.MusicNote
+import androidx.compose.material.icons.rounded.NotificationsActive
 import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -33,11 +37,17 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -48,12 +58,16 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.NavKey
 import com.example.materialwidgets.R
 import com.example.materialwidgets.data.DefaultDataRepository
 import com.example.materialwidgets.ui.theme.MaterialWidgetsTheme
 import com.example.materialwidgets.widget.clock.ClockAppWidgetReceiver
+import com.example.materialwidgets.widget.music.MediaSessionControllerHelper
 import com.example.materialwidgets.widget.music.MusicAppWidgetReceiver
 import com.example.materialwidgets.widget.weather.WeatherAppWidgetReceiver
 
@@ -70,6 +84,22 @@ fun MainScreen(
 @Composable
 internal fun MainScreen(data: List<String>, modifier: Modifier = Modifier) {
     val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+    var isMediaAccessEnabled by remember {
+        mutableStateOf(MediaSessionControllerHelper.isNotificationListenerEnabled(context))
+    }
+
+    DisposableEffect(lifecycleOwner, context) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                isMediaAccessEnabled = MediaSessionControllerHelper.isNotificationListenerEnabled(context)
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
 
     Scaffold(
         modifier = modifier,
@@ -134,7 +164,7 @@ internal fun MainScreen(data: List<String>, modifier: Modifier = Modifier) {
             item {
                 WidgetGalleryCard(
                     title = stringResource(R.string.music_widget_name),
-                    subtitle = "Scalloped Medallion Player (4x2) & Mini Controller (2x2)",
+                    subtitle = "Live Spotify / YouTube Music MediaSession + Album Art (4x2 & 2x2)",
                     icon = Icons.Rounded.MusicNote,
                     containerColor = MaterialTheme.colorScheme.tertiaryContainer,
                     contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
@@ -145,6 +175,74 @@ internal fun MainScreen(data: List<String>, modifier: Modifier = Modifier) {
                         )
                     },
                 )
+            }
+
+            item {
+                MediaSessionPermissionCard(
+                    isEnabled = isMediaAccessEnabled,
+                    onOpenSettings = {
+                        val intent = Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS).apply {
+                            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                        }
+                        context.startActivity(intent)
+                    },
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun MediaSessionPermissionCard(
+    isEnabled: Boolean,
+    onOpenSettings: () -> Unit,
+) {
+    Card(
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainer,
+        ),
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(18.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(
+                imageVector = if (isEnabled) Icons.Rounded.CheckCircle else Icons.Rounded.NotificationsActive,
+                contentDescription = null,
+                tint = if (isEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary,
+                modifier = Modifier.size(28.dp),
+            )
+            Spacer(modifier = Modifier.width(14.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = if (isEnabled) {
+                        "Live Media Session Connected"
+                    } else {
+                        "Connect Spotify & Media Players"
+                    },
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                )
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = if (isEnabled) {
+                        "Music widget reads live track info, album art, and controls from active media apps."
+                    } else {
+                        "Grant Notification Access so the Music widget can read live tracks and album art from Spotify or YouTube Music."
+                    },
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            if (!isEnabled) {
+                Spacer(modifier = Modifier.width(10.dp))
+                OutlinedButton(onClick = onOpenSettings) {
+                    Text("Enable")
+                }
             }
         }
     }
