@@ -2,9 +2,9 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "Android: Start Emulator (pixel_7)",
+      "label": "Android: Start Emulator (medium_phone)",
       "type": "shell",
-      "command": "android emulator start pixel_7",
+      "command": "android emulator start medium_phone",
       "problemMatcher": [],
       "presentation": {
         "reveal": "always",
@@ -29,7 +29,7 @@
       "label": "Android: Launch Emulator + Run App",
       "dependsOrder": "sequence",
       "dependsOn": [
-        "Android: Start Emulator (pixel_7)",
+        "Android: Start Emulator (medium_phone)",
         "Android: Build & Run App on Emulator"
       ],
       "problemMatcher": []
@@ -44,9 +44,9 @@
       "problemMatcher": []
     },
     {
-      "label": "Android: Stop Emulator (pixel_7)",
+      "label": "Android: Stop Emulator (medium_phone)",
       "type": "shell",
-      "command": "android emulator stop pixel_7",
+      "command": "android emulator stop medium_phone",
       "problemMatcher": []
     }
   ]

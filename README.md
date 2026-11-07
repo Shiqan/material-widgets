@@ -36,9 +36,27 @@ A modern, native Android widget pack built with **Kotlin**, **Jetpack Compose**,
 ## 🚀 Getting Started
 
 ### Prerequisites
-- **Android Studio** Ladybug / Meerkat or newer (AGP 9.0+)
+- **Android Studio** Ladybug / Meerkat or newer (AGP 9.0+) or **[Android CLI](https://developer.android.com/tools/agents/android-cli)**
 - **JDK 17** or newer
 - **Android SDK** Platform 36 (`minSdk = 26`, `targetSdk = 36`)
+
+### Create & Manage the Emulator (Android CLI)
+The VS Code workspace tasks (`.vscode/tasks.json`) are configured to use the `medium_phone` Android Virtual Device (AVD). You can create and manage it using the `android` CLI:
+
+```bash
+# List available hardware profiles (optional)
+android emulator create --list-profiles
+
+# Create the default medium_phone AVD
+android emulator create medium_phone
+
+# Verify the AVD is created
+android emulator list
+
+# Start / stop the emulator from the terminal (or via VS Code Tasks)
+android emulator start medium_phone
+android emulator stop medium_phone
+```
 
 ### Build & Run
 Clone the repository and build the debug APK using the Gradle wrapper:
