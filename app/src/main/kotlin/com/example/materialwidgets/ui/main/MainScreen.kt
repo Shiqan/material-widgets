@@ -29,11 +29,14 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AccessTime
 import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.BatteryChargingFull
+import androidx.compose.material.icons.rounded.Bluetooth
 import androidx.compose.material.icons.rounded.CalendarMonth
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.Cloud
 import androidx.compose.material.icons.rounded.FlashlightOn
 import androidx.compose.material.icons.rounded.LocationCity
+import androidx.compose.material.icons.rounded.Memory
 import androidx.compose.material.icons.rounded.MusicNote
 import androidx.compose.material.icons.rounded.NotificationsActive
 import androidx.compose.material.icons.rounded.Palette
@@ -91,8 +94,12 @@ import com.example.materialwidgets.widget.clock.ClockAppWidgetReceiver
 import com.example.materialwidgets.widget.music.MediaSessionControllerHelper
 import com.example.materialwidgets.widget.music.MusicAppWidgetReceiver
 import com.example.materialwidgets.widget.music.MusicPillAppWidgetReceiver
+import com.example.materialwidgets.widget.system.BatteryAppWidgetReceiver
+import com.example.materialwidgets.widget.system.StorageRamAppWidgetReceiver
+import com.example.materialwidgets.widget.toggles.BluetoothToggleAppWidgetReceiver
 import com.example.materialwidgets.widget.toggles.DataToggleAppWidgetReceiver
 import com.example.materialwidgets.widget.toggles.FlashlightToggleAppWidgetReceiver
+import com.example.materialwidgets.widget.toggles.RingerToggleAppWidgetReceiver
 import com.example.materialwidgets.widget.toggles.RotateToggleAppWidgetReceiver
 import com.example.materialwidgets.widget.toggles.WifiToggleAppWidgetReceiver
 import com.example.materialwidgets.widget.weather.WeatherAppWidgetReceiver
@@ -317,6 +324,70 @@ internal fun MainScreen(data: List<String>, modifier: Modifier = Modifier) {
                         requestPinAppWidget(
                             context = context,
                             receiverClass = RotateToggleAppWidgetReceiver::class.java,
+                        )
+                    },
+                )
+            }
+
+            item {
+                WidgetGalleryCard(
+                    title = stringResource(R.string.battery_widget_name),
+                    subtitle = "Live Battery & Charging Gauge (2x1 Pill, 2x2 Cookie, 4x2 Dual Card) • Temp & Source",
+                    icon = Icons.Rounded.BatteryChargingFull,
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    onPinClick = {
+                        requestPinAppWidget(
+                            context = context,
+                            receiverClass = BatteryAppWidgetReceiver::class.java,
+                        )
+                    },
+                )
+            }
+
+            item {
+                WidgetGalleryCard(
+                    title = stringResource(R.string.storage_ram_widget_name),
+                    subtitle = "Internal Storage & RAM Gauge (2x2 Dual Pill & 4x2 Segmented Cards) • Live Refresh",
+                    icon = Icons.Rounded.Memory,
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                    onPinClick = {
+                        requestPinAppWidget(
+                            context = context,
+                            receiverClass = StorageRamAppWidgetReceiver::class.java,
+                        )
+                    },
+                )
+            }
+
+            item {
+                WidgetGalleryCard(
+                    title = stringResource(R.string.bluetooth_toggle_widget_name),
+                    subtitle = "1x1 Scalloped Cookie Button • Opens Bluetooth Settings & Pairing",
+                    icon = Icons.Rounded.Bluetooth,
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    onPinClick = {
+                        requestPinAppWidget(
+                            context = context,
+                            receiverClass = BluetoothToggleAppWidgetReceiver::class.java,
+                        )
+                    },
+                )
+            }
+
+            item {
+                WidgetGalleryCard(
+                    title = stringResource(R.string.ringer_toggle_widget_name),
+                    subtitle = "1x1 12-Lobe Scalloped Badge • Cycles Sound, Vibrate & Silent Modes",
+                    icon = Icons.Rounded.NotificationsActive,
+                    containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+                    onPinClick = {
+                        requestPinAppWidget(
+                            context = context,
+                            receiverClass = RingerToggleAppWidgetReceiver::class.java,
                         )
                     },
                 )

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:description="@string/battery_widget_description"
+    android:initialLayout="@layout/glance_default_loading_layout"
+    android:maxResizeHeight="@dimen/clock_widget_max_resize_height"
+    android:maxResizeWidth="@dimen/clock_widget_max_resize_width"
+    android:minHeight="@dimen/clock_widget_min_height"
+    android:minResizeHeight="@dimen/clock_widget_min_resize_height"
+    android:minResizeWidth="@dimen/clock_widget_min_resize_width"
+    android:minWidth="@dimen/clock_widget_min_width"
+    android:resizeMode="horizontal|vertical"
+    android:targetCellHeight="@integer/clock_widget_target_cell_height"
+    android:targetCellWidth="@integer/clock_widget_target_cell_width"
+    android:updatePeriodMillis="1800000"
+    android:widgetCategory="home_screen|keyguard" />

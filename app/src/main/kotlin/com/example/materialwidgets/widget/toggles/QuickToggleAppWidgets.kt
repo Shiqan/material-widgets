@@ -1,9 +1,11 @@
 package com.example.materialwidgets.widget.toggles
 
+import android.bluetooth.BluetoothManager
 import android.content.Context
 import android.content.Intent
 import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraManager
+import android.media.AudioManager
 import android.os.Build
 import android.provider.Settings
 import androidx.annotation.DrawableRes
@@ -11,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.glance.ColorFilter
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
@@ -299,6 +302,184 @@ class ToggleAutoRotateAction : ActionCallback {
         }
 
         RotateToggleAppWidget().update(context, glanceId)
+    }
+}
+
+// ---------------------------------------------------------------------------
+// 5. Bluetooth Quick Button Widget (Scalloped Cookie Shape)
+// ---------------------------------------------------------------------------
+
+class BluetoothToggleAppWidgetReceiver : GlanceAppWidgetReceiver() {
+    override val glanceAppWidget: GlanceAppWidget = BluetoothToggleAppWidget()
+}
+
+class BluetoothToggleAppWidget : GlanceAppWidget() {
+    override val stateDefinition: GlanceStateDefinition<*> = PreferencesGlanceStateDefinition
+    override val sizeMode: SizeMode = SizeMode.Exact
+
+    override suspend fun provideGlance(context: Context, id: GlanceId) {
+        val systemBtEnabled = try {
+            context.getSystemService(BluetoothManager::class.java)?.adapter?.isEnabled ?: true
+        } catch (_: Exception) {
+            true
+        }
+
+        provideContent {
+            val prefs = currentState<Preferences>()
+            val isBtOn = prefs[KEY_BLUETOOTH_ON] ?: systemBtEnabled
+            MaterialYouGlanceTheme {
+                QuickToggleButtonContent(
+                    iconRes = R.drawable.ic_toggle_bluetooth,
+                    contentDescription = "Bluetooth Settings",
+                    shape = QuickButtonShape.SCALLOP_8,
+                    isActive = isBtOn,
+                    onClick = actionRunCallback<ToggleBluetoothAction>(),
+                )
+            }
+        }
+    }
+
+    override fun onCompositionError(context: Context, glanceId: GlanceId, appWidgetId: Int, throwable: Throwable) {
+        showWidgetErrorFallback(context, appWidgetId, "Bluetooth")
+    }
+
+    companion object {
+        val KEY_BLUETOOTH_ON = booleanPreferencesKey("quick_toggle_bluetooth_on")
+    }
+}
+
+class ToggleBluetoothAction : ActionCallback {
+    override suspend fun onAction(
+        context: Context,
+        glanceId: GlanceId,
+        parameters: ActionParameters,
+    ) {
+        val systemBtEnabled = try {
+            context.getSystemService(BluetoothManager::class.java)?.adapter?.isEnabled
+        } catch (_: Exception) {
+            null
+        }
+
+        updateAppWidgetState(context, glanceId) { prefs ->
+            val current = prefs[BluetoothToggleAppWidget.KEY_BLUETOOTH_ON] ?: (systemBtEnabled ?: true)
+            prefs[BluetoothToggleAppWidget.KEY_BLUETOOTH_ON] = !current
+        }
+
+        try {
+            val intent = Intent(Settings.ACTION_BLUETOOTH_SETTINGS).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            }
+            context.startActivity(intent)
+        } catch (_: Exception) {
+        }
+
+        BluetoothToggleAppWidget().update(context, glanceId)
+    }
+}
+
+// ---------------------------------------------------------------------------
+// 6. Ringer / Sound Mode Cycle Widget (12-Lobe Scalloped Badge Shape)
+// ---------------------------------------------------------------------------
+
+class RingerToggleAppWidgetReceiver : GlanceAppWidgetReceiver() {
+    override val glanceAppWidget: GlanceAppWidget = RingerToggleAppWidget()
+}
+
+class RingerToggleAppWidget : GlanceAppWidget() {
+    override val stateDefinition: GlanceStateDefinition<*> = PreferencesGlanceStateDefinition
+    override val sizeMode: SizeMode = SizeMode.Exact
+
+    override suspend fun provideGlance(context: Context, id: GlanceId) {
+        val systemRingerMode = try {
+            context.getSystemService(AudioManager::class.java)?.ringerMode
+                ?: AudioManager.RINGER_MODE_NORMAL
+        } catch (_: Exception) {
+            AudioManager.RINGER_MODE_NORMAL
+        }
+
+        provideContent {
+            val prefs = currentState<Preferences>()
+            val mode = prefs[KEY_RINGER_MODE] ?: systemRingerMode
+            val (iconRes, desc, isActive) = when (mode) {
+                AudioManager.RINGER_MODE_VIBRATE -> Triple(
+                    R.drawable.ic_toggle_ringer_vibrate,
+                    "Ringer: Vibrate",
+                    true,
+                )
+                AudioManager.RINGER_MODE_SILENT -> Triple(
+                    R.drawable.ic_toggle_ringer_silent,
+                    "Ringer: Silent",
+                    false,
+                )
+                else -> Triple(
+                    R.drawable.ic_toggle_ringer_normal,
+                    "Ringer: Sound On",
+                    true,
+                )
+            }
+            MaterialYouGlanceTheme {
+                QuickToggleButtonContent(
+                    iconRes = iconRes,
+                    contentDescription = desc,
+                    shape = QuickButtonShape.SCALLOP_12,
+                    isActive = isActive,
+                    onClick = actionRunCallback<CycleRingerModeAction>(),
+                )
+            }
+        }
+    }
+
+    override fun onCompositionError(context: Context, glanceId: GlanceId, appWidgetId: Int, throwable: Throwable) {
+        showWidgetErrorFallback(context, appWidgetId, "Ringer")
+    }
+
+    companion object {
+        val KEY_RINGER_MODE = intPreferencesKey("quick_toggle_ringer_mode")
+    }
+}
+
+class CycleRingerModeAction : ActionCallback {
+    override suspend fun onAction(
+        context: Context,
+        glanceId: GlanceId,
+        parameters: ActionParameters,
+    ) {
+        val audioManager = context.getSystemService(AudioManager::class.java)
+        val currentSystemMode = audioManager?.ringerMode ?: AudioManager.RINGER_MODE_NORMAL
+
+        var nextMode = AudioManager.RINGER_MODE_VIBRATE
+        updateAppWidgetState(context, glanceId) { prefs ->
+            val current = prefs[RingerToggleAppWidget.KEY_RINGER_MODE] ?: currentSystemMode
+            nextMode = when (current) {
+                AudioManager.RINGER_MODE_NORMAL -> AudioManager.RINGER_MODE_VIBRATE
+                AudioManager.RINGER_MODE_VIBRATE -> AudioManager.RINGER_MODE_SILENT
+                else -> AudioManager.RINGER_MODE_NORMAL
+            }
+            prefs[RingerToggleAppWidget.KEY_RINGER_MODE] = nextMode
+        }
+
+        try {
+            if (nextMode == AudioManager.RINGER_MODE_SILENT) {
+                // Switching to Silent may require DND policy access; fall back to Vibrate/Normal if restricted
+                audioManager?.ringerMode = AudioManager.RINGER_MODE_SILENT
+            } else {
+                audioManager?.ringerMode = nextMode
+            }
+        } catch (_: SecurityException) {
+            // If Do Not Disturb access is not granted for Silent mode, cycle between Normal and Vibrate
+            val fallbackMode = if (currentSystemMode == AudioManager.RINGER_MODE_NORMAL) {
+                AudioManager.RINGER_MODE_VIBRATE
+            } else {
+                AudioManager.RINGER_MODE_NORMAL
+            }
+            try {
+                audioManager?.ringerMode = fallbackMode
+            } catch (_: Exception) {
+            }
+        } catch (_: Exception) {
+        }
+
+        RingerToggleAppWidget().update(context, glanceId)
     }
 }
 

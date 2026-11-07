@@ -20,4 +20,12 @@
     <string name="flashlight_toggle_widget_description">Circular Material You Torch / Flashlight toggle button widget</string>
     <string name="rotate_toggle_widget_name">Quick Button: Auto-Rotate</string>
     <string name="rotate_toggle_widget_description">Scalloped Material You Screen Auto-Rotate toggle button widget</string>
+    <string name="battery_widget_name">Material You Battery &amp; Power</string>
+    <string name="battery_widget_description">Scalloped cookie, stadium pill, and dual-card battery &amp; charging gauge</string>
+    <string name="storage_ram_widget_name">Material You Storage &amp; RAM</string>
+    <string name="storage_ram_widget_description">Live internal storage and memory usage gauge with Material You dynamic colors</string>
+    <string name="bluetooth_toggle_widget_name">Quick Button: Bluetooth</string>
+    <string name="bluetooth_toggle_widget_description">Scalloped Material You Bluetooth quick button widget</string>
+    <string name="ringer_toggle_widget_name">Quick Button: Ringer Mode</string>
+    <string name="ringer_toggle_widget_description">12-lobe scalloped Material You Sound / Vibrate / Silent cycle button</string>
 </resources>
