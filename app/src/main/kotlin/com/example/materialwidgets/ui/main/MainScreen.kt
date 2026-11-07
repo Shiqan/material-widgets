@@ -7,6 +7,7 @@ import android.content.Intent
 import android.os.Build
 import android.provider.Settings
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,8 +21,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AccessTime
 import androidx.compose.material.icons.rounded.Add
@@ -29,29 +33,37 @@ import androidx.compose.material.icons.rounded.CalendarMonth
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.Cloud
 import androidx.compose.material.icons.rounded.FlashlightOn
+import androidx.compose.material.icons.rounded.LocationCity
 import androidx.compose.material.icons.rounded.MusicNote
 import androidx.compose.material.icons.rounded.NotificationsActive
 import androidx.compose.material.icons.rounded.Palette
+import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.ScreenRotation
 import androidx.compose.material.icons.rounded.SwapVert
 import androidx.compose.material.icons.rounded.Wifi
+import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -59,8 +71,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
@@ -82,6 +96,9 @@ import com.example.materialwidgets.widget.toggles.FlashlightToggleAppWidgetRecei
 import com.example.materialwidgets.widget.toggles.RotateToggleAppWidgetReceiver
 import com.example.materialwidgets.widget.toggles.WifiToggleAppWidgetReceiver
 import com.example.materialwidgets.widget.weather.WeatherAppWidgetReceiver
+import com.example.materialwidgets.widget.weather.WeatherRepository
+import com.example.materialwidgets.widget.weather.formatTemp
+import kotlinx.coroutines.launch
 
 @Composable
 fun MainScreen(
@@ -192,7 +209,7 @@ internal fun MainScreen(data: List<String>, modifier: Modifier = Modifier) {
             item {
                 WidgetGalleryCard(
                     title = stringResource(R.string.weather_widget_name),
-                    subtitle = "Compact Tile (2x2) & Hourly Forecast Card (4x2) • °C/°F Toggle",
+                    subtitle = "Live City Forecast (2x2 & 4x2) • No Location Permission • °C/°F Toggle",
                     icon = Icons.Rounded.Cloud,
                     containerColor = MaterialTheme.colorScheme.secondaryContainer,
                     contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
@@ -203,6 +220,10 @@ internal fun MainScreen(data: List<String>, modifier: Modifier = Modifier) {
                         )
                     },
                 )
+            }
+
+            item {
+                WeatherLocationConfigCard()
             }
 
             item {
@@ -310,6 +331,237 @@ internal fun MainScreen(data: List<String>, modifier: Modifier = Modifier) {
                         }
                         context.startActivity(intent)
                     },
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun WeatherLocationConfigCard() {
+    val context = LocalContext.current
+    val focusManager = LocalFocusManager.current
+    val scope = rememberCoroutineScope()
+
+    var cityInput by remember { mutableStateOf(WeatherRepository.getConfiguredCity(context)) }
+    var useFahrenheit by remember { mutableStateOf(WeatherRepository.isFahrenheit(context)) }
+    var weatherSnapshot by remember { mutableStateOf(WeatherRepository.getCachedWeather(context)) }
+    var isLoading by remember { mutableStateOf(false) }
+    var statusMessage by remember { mutableStateOf<String?>(null) }
+
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner, context) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                useFahrenheit = WeatherRepository.isFahrenheit(context)
+                weatherSnapshot = WeatherRepository.getCachedWeather(context)
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        if (WeatherRepository.getLastUpdatedMs(context) == 0L) {
+            isLoading = true
+            WeatherRepository.fetchAndSyncWeather(context)
+                .onSuccess {
+                    weatherSnapshot = it
+                    statusMessage = "Live weather synced for ${it.city}"
+                }
+            isLoading = false
+        }
+    }
+
+    fun submitCity(targetCity: String) {
+        val cleaned = targetCity.trim()
+        if (cleaned.isEmpty()) return
+        cityInput = cleaned
+        focusManager.clearFocus()
+        scope.launch {
+            isLoading = true
+            statusMessage = null
+            WeatherRepository.updateCityAndFetch(context, cleaned)
+                .onSuccess { snapshot ->
+                    weatherSnapshot = snapshot
+                    cityInput = snapshot.city
+                    statusMessage = "Updated live weather for ${snapshot.city}"
+                }
+                .onFailure { err ->
+                    weatherSnapshot = WeatherRepository.getCachedWeather(context)
+                    statusMessage = "Could not fetch '${cleaned}': ${err.localizedMessage ?: "Check connection"}"
+                }
+            isLoading = false
+        }
+    }
+
+    val presetCities = listOf("Amsterdam", "San Francisco", "Tokyo", "London", "New York", "Berlin")
+    val unitLabel = if (useFahrenheit) "F" else "C"
+
+    Card(
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainer,
+        ),
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(18.dp),
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.LocationCity,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(26.dp),
+                )
+                Spacer(modifier = Modifier.width(12.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "Weather Location & Units",
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                    )
+                    Text(
+                        text = "Configured city without GPS/Location permission",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+
+                // Celsius / Fahrenheit segmented filter chips
+                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    FilterChip(
+                        selected = !useFahrenheit,
+                        onClick = {
+                            if (useFahrenheit) {
+                                useFahrenheit = false
+                                scope.launch { WeatherRepository.setTemperatureUnit(context, false) }
+                            }
+                        },
+                        label = { Text("°C", fontWeight = FontWeight.Bold) },
+                    )
+                    FilterChip(
+                        selected = useFahrenheit,
+                        onClick = {
+                            if (!useFahrenheit) {
+                                useFahrenheit = true
+                                scope.launch { WeatherRepository.setTemperatureUnit(context, true) }
+                            }
+                        },
+                        label = { Text("°F", fontWeight = FontWeight.Bold) },
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // Live snapshot status pill
+            Surface(
+                shape = RoundedCornerShape(16.dp),
+                color = MaterialTheme.colorScheme.secondaryContainer,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 14.dp, vertical = 10.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = "${weatherSnapshot.city} • ${weatherSnapshot.condition}",
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSecondaryContainer,
+                        )
+                        Text(
+                            text = "H:${formatTemp(weatherSnapshot.highCelsius, useFahrenheit)}  " +
+                                "L:${formatTemp(weatherSnapshot.lowCelsius, useFahrenheit)}  •  " +
+                                "Humidity ${weatherSnapshot.humidityPercent}%  •  " +
+                                "Wind ${weatherSnapshot.windKmh} km/h",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.8f),
+                        )
+                    }
+                    Text(
+                        text = "${formatTemp(weatherSnapshot.tempCelsius, useFahrenheit)}$unitLabel",
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSecondaryContainer,
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                OutlinedTextField(
+                    value = cityInput,
+                    onValueChange = { cityInput = it },
+                    label = { Text("City name") },
+                    singleLine = true,
+                    shape = RoundedCornerShape(16.dp),
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                    keyboardActions = KeyboardActions(onSearch = { submitCity(cityInput) }),
+                    modifier = Modifier.weight(1f),
+                )
+                Spacer(modifier = Modifier.width(10.dp))
+                FilledTonalButton(
+                    onClick = { submitCity(cityInput) },
+                    enabled = !isLoading && cityInput.isNotBlank(),
+                    modifier = Modifier.height(52.dp),
+                ) {
+                    if (isLoading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(18.dp),
+                            strokeWidth = 2.dp,
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.Rounded.Refresh,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp),
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text("Update")
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Quick preset city chips
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                presetCities.forEach { preset ->
+                    AssistChip(
+                        onClick = { submitCity(preset) },
+                        label = { Text(preset) },
+                    )
+                }
+            }
+
+            if (statusMessage != null) {
+                Spacer(modifier = Modifier.height(6.dp))
+                Text(
+                    text = statusMessage!!,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.primary,
                 )
             }
         }
