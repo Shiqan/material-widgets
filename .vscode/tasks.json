@@ -37,9 +37,9 @@
     {
       "label": "Gradle: Install & Launch Debug APK",
       "type": "shell",
-      "command": "./gradlew installDebug && adb shell am start -n com.example.materialwidgets/.MainActivity",
+      "command": "./gradlew installDebug && adb shell am start -n dev.shiqan.materialwidgets/.MainActivity",
       "windows": {
-        "command": ".\\gradlew.bat installDebug; adb shell am start -n com.example.materialwidgets/.MainActivity"
+        "command": ".\\gradlew.bat installDebug; adb shell am start -n dev.shiqan.materialwidgets/.MainActivity"
       },
       "problemMatcher": []
     },

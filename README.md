@@ -83,7 +83,7 @@ On Windows PowerShell:
 
 ```text
 app/src/main/
-├── kotlin/com/example/materialwidgets/
+├── kotlin/dev/shiqan/materialwidgets/
 │   ├── MainActivity.kt                  # Companion showcase & widget pin app
 │   ├── ui/
 │   │   ├── main/                        # In-app widget gallery & preview cards

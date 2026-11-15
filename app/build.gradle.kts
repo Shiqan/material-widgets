@@ -5,10 +5,10 @@ plugins {
 }
 
 android {
-  namespace = "com.example.materialwidgets"
+  namespace = "dev.shiqan.materialwidgets"
   compileSdk = 36
   defaultConfig {
-    applicationId = "com.example.materialwidgets"
+    applicationId = "dev.shiqan.materialwidgets"
     minSdk = 26
     targetSdk = 36
     versionCode = 1
