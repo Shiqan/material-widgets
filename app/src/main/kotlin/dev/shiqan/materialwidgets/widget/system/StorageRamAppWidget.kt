@@ -7,6 +7,7 @@ import android.os.Environment
 import android.os.StatFs
 import android.provider.Settings
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.datastore.preferences.core.Preferences
@@ -22,6 +23,7 @@ import androidx.glance.action.ActionParameters
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
+import androidx.glance.appwidget.PreviewSizeMode
 import androidx.glance.appwidget.SizeMode
 import androidx.glance.appwidget.action.ActionCallback
 import androidx.glance.appwidget.action.actionRunCallback
@@ -119,6 +121,7 @@ class StorageRamAppWidgetReceiver : GlanceAppWidgetReceiver() {
 class StorageRamAppWidget : GlanceAppWidget() {
     override val stateDefinition: GlanceStateDefinition<*> = PreferencesGlanceStateDefinition
     override val sizeMode: SizeMode = SizeMode.Exact
+    override val previewSizeMode: PreviewSizeMode = SizeMode.Responsive(setOf(DpSize(160.dp, 160.dp)))
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         provideContent {
@@ -129,6 +132,15 @@ class StorageRamAppWidget : GlanceAppWidget() {
                     snapshot = snapshot,
                     revision = revision,
                 )
+            }
+        }
+    }
+
+    override suspend fun providePreview(context: Context, widgetCategory: Int) {
+        val snapshot = StorageRamReader.read(context)
+        provideContent {
+            MaterialYouGlanceTheme {
+                StorageRamWidgetContent(snapshot = snapshot)
             }
         }
     }

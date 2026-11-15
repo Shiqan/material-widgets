@@ -3,7 +3,9 @@ package dev.shiqan.materialwidgets.widget.clock
 import android.content.Context
 import android.content.Intent
 import android.provider.AlarmClock
+import android.text.format.DateFormat
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.datastore.preferences.core.Preferences
@@ -19,6 +21,7 @@ import androidx.glance.action.ActionParameters
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
+import androidx.glance.appwidget.PreviewSizeMode
 import androidx.glance.appwidget.SizeMode
 import androidx.glance.appwidget.action.ActionCallback
 import androidx.glance.appwidget.action.actionRunCallback
@@ -64,13 +67,24 @@ class ClockAppWidgetReceiver : GlanceAppWidgetReceiver() {
 class ClockAppWidget : GlanceAppWidget() {
     override val stateDefinition: GlanceStateDefinition<*> = PreferencesGlanceStateDefinition
     override val sizeMode: SizeMode = SizeMode.Exact
+    override val previewSizeMode: PreviewSizeMode = SizeMode.Responsive(setOf(DpSize(160.dp, 160.dp)))
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
+        val default24Hour = DateFormat.is24HourFormat(context)
         provideContent {
             val prefs = currentState<Preferences>()
-            val use24Hour = prefs[KEY_USE_24_HOUR] ?: false
+            val use24Hour = prefs[KEY_USE_24_HOUR] ?: default24Hour
             MaterialYouGlanceTheme {
                 ClockWidgetContent(use24Hour = use24Hour)
+            }
+        }
+    }
+
+    override suspend fun providePreview(context: Context, widgetCategory: Int) {
+        val default24Hour = DateFormat.is24HourFormat(context)
+        provideContent {
+            MaterialYouGlanceTheme {
+                ClockWidgetContent(use24Hour = default24Hour)
             }
         }
     }

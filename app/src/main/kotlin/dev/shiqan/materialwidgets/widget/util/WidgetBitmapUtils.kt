@@ -125,6 +125,30 @@ fun cacheWidgetImageUri(
 }
 
 /**
+ * Scales down an in-memory [Bitmap] to fit within [maxWidthDp] x [maxHeightDp] so
+ * RemoteViews (including pin and launcher previews) stay well below the system memory cap.
+ */
+fun downsampleBitmapForWidget(
+    context: Context,
+    source: Bitmap?,
+    maxWidthDp: Int = 128,
+    maxHeightDp: Int = 128,
+): Bitmap? {
+    if (source == null || source.isRecycled || source.width <= 0 || source.height <= 0) return null
+    val density = context.resources.displayMetrics.density
+    val maxW = max(1, (maxWidthDp * density).toInt())
+    val maxH = max(1, (maxHeightDp * density).toInt())
+    val scale = minOf(1f, maxW.toFloat() / source.width, maxH.toFloat() / source.height)
+    val targetW = max(1, (source.width * scale).toInt())
+    val targetH = max(1, (source.height * scale).toInt())
+    return if (targetW < source.width || targetH < source.height) {
+        Bitmap.createScaledBitmap(source, targetW, targetH, true)
+    } else {
+        source
+    }
+}
+
+/**
  * Displays a zero-bitmap text fallback RemoteViews if widget composition fails.
  */
 fun showWidgetErrorFallback(

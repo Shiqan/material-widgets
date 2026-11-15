@@ -1,8 +1,10 @@
 package dev.shiqan.materialwidgets.widget.weather
 
+import android.appwidget.AppWidgetManager
 import android.content.Context
 import androidx.annotation.DrawableRes
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.datastore.preferences.core.Preferences
@@ -22,6 +24,7 @@ import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
+import androidx.glance.appwidget.PreviewSizeMode
 import androidx.glance.appwidget.SizeMode
 import androidx.glance.appwidget.action.ActionCallback
 import androidx.glance.appwidget.action.actionRunCallback
@@ -51,6 +54,7 @@ import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import dev.shiqan.materialwidgets.R
 import dev.shiqan.materialwidgets.widget.theme.MaterialYouGlanceTheme
+import dev.shiqan.materialwidgets.widget.util.refreshWidgetPreview
 import dev.shiqan.materialwidgets.widget.util.showWidgetErrorFallback
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -291,6 +295,7 @@ object WeatherRepository {
             }
             WeatherAppWidget().update(context, glanceId)
         }
+        refreshWidgetPreview(context, WeatherAppWidgetReceiver::class)
     }
 
     private fun resolveCoordinates(
@@ -498,10 +503,16 @@ class WeatherAppWidgetReceiver : GlanceAppWidgetReceiver() {
 class WeatherAppWidget : GlanceAppWidget() {
     override val stateDefinition: GlanceStateDefinition<*> = PreferencesGlanceStateDefinition
     override val sizeMode: SizeMode = SizeMode.Exact
+    override val previewSizeMode: PreviewSizeMode = SizeMode.Responsive(setOf(DpSize(160.dp, 160.dp)))
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
-        // Trigger a live sync if we haven't fetched yet or if the cached forecast is stale
-        WeatherRepository.syncIfStale(context)
+        val isPreviewPin = runCatching {
+            GlanceAppWidgetManager(context).getAppWidgetId(id) == AppWidgetManager.INVALID_APPWIDGET_ID
+        }.getOrDefault(false)
+        if (!isPreviewPin) {
+            // Trigger a live sync if we haven't fetched yet or if the cached forecast is stale
+            WeatherRepository.syncIfStale(context)
+        }
         val fallbackSnapshot = WeatherRepository.getCachedWeather(context)
         val fallbackFahrenheit = WeatherRepository.isFahrenheit(context)
 
@@ -538,6 +549,19 @@ class WeatherAppWidget : GlanceAppWidget() {
             MaterialYouGlanceTheme {
                 WeatherWidgetContent(
                     weather = weather,
+                    useFahrenheit = useFahrenheit,
+                )
+            }
+        }
+    }
+
+    override suspend fun providePreview(context: Context, widgetCategory: Int) {
+        val snapshot = WeatherRepository.getCachedWeather(context)
+        val useFahrenheit = WeatherRepository.isFahrenheit(context)
+        provideContent {
+            MaterialYouGlanceTheme {
+                WeatherWidgetContent(
+                    weather = snapshot,
                     useFahrenheit = useFahrenheit,
                 )
             }

@@ -1,8 +1,10 @@
 package dev.shiqan.materialwidgets.widget.music
 
+import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.graphics.Bitmap
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.datastore.preferences.core.Preferences
@@ -15,7 +17,9 @@ import androidx.glance.ImageProvider
 import androidx.glance.LocalSize
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
+import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
+import androidx.glance.appwidget.PreviewSizeMode
 import androidx.glance.appwidget.SizeMode
 import androidx.glance.appwidget.action.actionRunCallback
 import androidx.glance.appwidget.appWidgetBackground
@@ -44,6 +48,7 @@ import androidx.glance.text.TextStyle
 import dev.shiqan.materialwidgets.R
 import dev.shiqan.materialwidgets.widget.theme.MaterialYouGlanceTheme
 import dev.shiqan.materialwidgets.widget.util.decodeDownsampledWidgetBitmap
+import dev.shiqan.materialwidgets.widget.util.downsampleBitmapForWidget
 import dev.shiqan.materialwidgets.widget.util.showWidgetErrorFallback
 import java.io.File
 
@@ -62,8 +67,17 @@ class MusicPillAppWidgetReceiver : GlanceAppWidgetReceiver() {
 class MusicPillAppWidget : GlanceAppWidget() {
     override val stateDefinition: GlanceStateDefinition<*> = PreferencesGlanceStateDefinition
     override val sizeMode: SizeMode = SizeMode.Exact
+    override val previewSizeMode: PreviewSizeMode = SizeMode.Responsive(setOf(DpSize(320.dp, 64.dp)))
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
+        val isPreviewPin = runCatching {
+            GlanceAppWidgetManager(context).getAppWidgetId(id) == AppWidgetManager.INVALID_APPWIDGET_ID
+        }.getOrDefault(false)
+        if (isPreviewPin) {
+            providePreviewContent(context)
+            return
+        }
+
         MediaSessionControllerHelper.syncFromActiveSession(context)
 
         val artFile = File(context.filesDir, MediaSessionControllerHelper.ALBUM_ART_FILENAME)
@@ -127,6 +141,29 @@ class MusicPillAppWidget : GlanceAppWidget() {
                     title = title,
                     subtitle = subtitle,
                     albumArtBitmap = cachedAlbumArt,
+                    isPlaying = isPlaying,
+                )
+            }
+        }
+    }
+
+    override suspend fun providePreview(context: Context, widgetCategory: Int) {
+        providePreviewContent(context)
+    }
+
+    private suspend fun providePreviewContent(context: Context) {
+        val active = MediaSessionControllerHelper.readActiveSessionSnapshot(context)
+        val previewArt = downsampleBitmapForWidget(context, active?.albumArt, maxWidthDp = 72, maxHeightDp = 72)
+        val title = active?.title ?: "No Music Playing"
+        val subtitle = active?.artist ?: "Tap to Play"
+        val isPlaying = active?.isPlaying ?: false
+
+        provideContent {
+            MaterialYouGlanceTheme {
+                MusicPillWidgetContent(
+                    title = title,
+                    subtitle = subtitle,
+                    albumArtBitmap = previewArt,
                     isPlaying = isPlaying,
                 )
             }

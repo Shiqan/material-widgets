@@ -142,18 +142,30 @@ object MediaSessionControllerHelper {
         }
     }
 
+    data class ActiveSessionSnapshot(
+        val title: String,
+        val artist: String,
+        val album: String,
+        val elapsedLabel: String,
+        val durationLabel: String,
+        val progress: Float,
+        val isPlaying: Boolean,
+        val packageName: String,
+        val albumArt: Bitmap?,
+    )
+
     /**
-     * Reads metadata, playback state, and album art from the active MediaController
-     * and pushes an update to all MusicAppWidget instances.
+     * Reads the current active MediaSession metadata and playback state without modifying
+     * persisted widget DataStore state. Useful for widget pin and launcher previews.
      */
-    suspend fun syncFromActiveSession(context: Context): Boolean {
-        val controller = getPrimaryMediaController(context) ?: return false
-        val metadata = controller.metadata ?: return false
+    fun readActiveSessionSnapshot(context: Context): ActiveSessionSnapshot? {
+        val controller = getPrimaryMediaController(context) ?: return null
+        val metadata = controller.metadata ?: return null
         val playbackState = controller.playbackState
 
         val title = metadata.getString(MediaMetadata.METADATA_KEY_TITLE)
             ?: metadata.getString(MediaMetadata.METADATA_KEY_DISPLAY_TITLE)
-        if (title.isNullOrBlank()) return false
+        if (title.isNullOrBlank()) return null
 
         val artist = metadata.getString(MediaMetadata.METADATA_KEY_ARTIST)
             ?: metadata.getString(MediaMetadata.METADATA_KEY_ALBUM_ARTIST)
@@ -174,13 +186,34 @@ object MediaSessionControllerHelper {
             0f
         }
 
-        // Save album art bitmap to internal filesDir for downsampled widget decoding
         val artBitmap = metadata.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART)
             ?: metadata.getBitmap(MediaMetadata.METADATA_KEY_ART)
             ?: metadata.getBitmap(MediaMetadata.METADATA_KEY_DISPLAY_ICON)
+
+        return ActiveSessionSnapshot(
+            title = title,
+            artist = artist,
+            album = album,
+            elapsedLabel = formatDurationMs(positionMs),
+            durationLabel = if (durationMs > 0L) formatDurationMs(durationMs) else "--:--",
+            progress = progress,
+            isPlaying = isPlaying,
+            packageName = controller.packageName,
+            albumArt = artBitmap?.takeUnless { it.isRecycled },
+        )
+    }
+
+    /**
+     * Reads metadata, playback state, and album art from the active MediaController
+     * and pushes an update to all MusicAppWidget instances.
+     */
+    suspend fun syncFromActiveSession(context: Context): Boolean {
+        val snapshot = readActiveSessionSnapshot(context) ?: return false
+
+        // Save album art bitmap to internal filesDir for downsampled widget decoding
         val artFile = File(context.filesDir, ALBUM_ART_FILENAME)
-        val hasArt = if (artBitmap != null && !artBitmap.isRecycled) {
-            saveAlbumArtBitmap(artBitmap, artFile)
+        val hasArt = if (snapshot.albumArt != null && !snapshot.albumArt.isRecycled) {
+            saveAlbumArtBitmap(snapshot.albumArt, artFile)
         } else {
             if (artFile.exists()) artFile.delete()
             false
@@ -195,15 +228,15 @@ object MediaSessionControllerHelper {
             for (glanceId in glanceIds) {
                 updateAppWidgetState(context, glanceId) { prefs ->
                     prefs[MusicAppWidget.KEY_HAS_LIVE_SESSION] = true
-                    prefs[MusicAppWidget.KEY_LIVE_TITLE] = title
-                    prefs[MusicAppWidget.KEY_LIVE_ARTIST] = artist
-                    prefs[MusicAppWidget.KEY_LIVE_ALBUM] = album
-                    prefs[MusicAppWidget.KEY_LIVE_ELAPSED] = formatDurationMs(positionMs)
-                    prefs[MusicAppWidget.KEY_LIVE_DURATION] = if (durationMs > 0L) formatDurationMs(durationMs) else "--:--"
-                    prefs[MusicAppWidget.KEY_LIVE_PROGRESS] = progress
-                    prefs[MusicAppWidget.KEY_LIVE_PACKAGE] = controller.packageName
+                    prefs[MusicAppWidget.KEY_LIVE_TITLE] = snapshot.title
+                    prefs[MusicAppWidget.KEY_LIVE_ARTIST] = snapshot.artist
+                    prefs[MusicAppWidget.KEY_LIVE_ALBUM] = snapshot.album
+                    prefs[MusicAppWidget.KEY_LIVE_ELAPSED] = snapshot.elapsedLabel
+                    prefs[MusicAppWidget.KEY_LIVE_DURATION] = snapshot.durationLabel
+                    prefs[MusicAppWidget.KEY_LIVE_PROGRESS] = snapshot.progress
+                    prefs[MusicAppWidget.KEY_LIVE_PACKAGE] = snapshot.packageName
                     prefs[MusicAppWidget.KEY_HAS_ALBUM_ART] = hasArt
-                    prefs[MusicAppWidget.KEY_IS_PLAYING] = isPlaying
+                    prefs[MusicAppWidget.KEY_IS_PLAYING] = snapshot.isPlaying
                     prefs[MusicAppWidget.KEY_ART_REVISION] = (prefs[MusicAppWidget.KEY_ART_REVISION] ?: 0) + 1
                 }
                 widget.update(context, glanceId)

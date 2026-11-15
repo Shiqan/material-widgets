@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.provider.CalendarContract
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.glance.ColorFilter
@@ -16,6 +17,7 @@ import androidx.glance.LocalSize
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
+import androidx.glance.appwidget.PreviewSizeMode
 import androidx.glance.appwidget.SizeMode
 import androidx.glance.appwidget.action.actionStartActivity
 import androidx.glance.appwidget.appWidgetBackground
@@ -58,8 +60,17 @@ class CalendarCardAppWidgetReceiver : GlanceAppWidgetReceiver() {
  */
 class CalendarCardAppWidget : GlanceAppWidget() {
     override val sizeMode: SizeMode = SizeMode.Exact
+    override val previewSizeMode: PreviewSizeMode = SizeMode.Responsive(setOf(DpSize(160.dp, 160.dp)))
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
+        provideContent {
+            MaterialYouGlanceTheme {
+                CalendarCardWidgetContent()
+            }
+        }
+    }
+
+    override suspend fun providePreview(context: Context, widgetCategory: Int) {
         provideContent {
             MaterialYouGlanceTheme {
                 CalendarCardWidgetContent()

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="widget_preview_primary">#FF00506E</color>
+    <color name="widget_preview_on_primary">#FFFFFFFF</color>
+    <color name="widget_preview_primary_container">#FF23759B</color>
+    <color name="widget_preview_on_primary_container">#FFFFFFFF</color>
+    <color name="widget_preview_secondary_container">#FFCFEAFD</color>
+    <color name="widget_preview_on_secondary_container">#FF344D5C</color>
+    <color name="widget_preview_tertiary_container">#FF885E9A</color>
+    <color name="widget_preview_on_tertiary_container">#FFFFFFFF</color>
+    <color name="widget_preview_surface_variant">#FFDBE4EB</color>
+    <color name="widget_preview_on_surface">#FF191C1F</color>
+    <color name="widget_preview_on_surface_variant">#FF40484E</color>
+    <color name="widget_preview_inverse_surface">#FF2D3133</color>
+    <color name="widget_preview_inverse_on_surface">#FFEFF1F4</color>
+    <color name="widget_preview_inverse_primary">#FF87CFF9</color>
+</resources>

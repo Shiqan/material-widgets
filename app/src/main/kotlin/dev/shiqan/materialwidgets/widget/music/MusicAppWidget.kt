@@ -1,8 +1,10 @@
 package dev.shiqan.materialwidgets.widget.music
 
+import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.graphics.Bitmap
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.datastore.preferences.core.Preferences
@@ -20,8 +22,10 @@ import androidx.glance.LocalSize
 import androidx.glance.action.ActionParameters
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
+import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
 import androidx.glance.appwidget.LinearProgressIndicator
+import androidx.glance.appwidget.PreviewSizeMode
 import androidx.glance.appwidget.SizeMode
 import androidx.glance.appwidget.action.ActionCallback
 import androidx.glance.appwidget.action.actionRunCallback
@@ -54,6 +58,7 @@ import androidx.glance.text.TextStyle
 import dev.shiqan.materialwidgets.R
 import dev.shiqan.materialwidgets.widget.theme.MaterialYouGlanceTheme
 import dev.shiqan.materialwidgets.widget.util.decodeDownsampledWidgetBitmap
+import dev.shiqan.materialwidgets.widget.util.downsampleBitmapForWidget
 import dev.shiqan.materialwidgets.widget.util.showWidgetErrorFallback
 import kotlinx.coroutines.delay
 import java.io.File
@@ -102,8 +107,17 @@ class MusicAppWidgetReceiver : GlanceAppWidgetReceiver() {
 class MusicAppWidget : GlanceAppWidget() {
     override val stateDefinition: GlanceStateDefinition<*> = PreferencesGlanceStateDefinition
     override val sizeMode: SizeMode = SizeMode.Exact
+    override val previewSizeMode: PreviewSizeMode = SizeMode.Responsive(setOf(DpSize(280.dp, 140.dp)))
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
+        val isPreviewPin = runCatching {
+            GlanceAppWidgetManager(context).getAppWidgetId(id) == AppWidgetManager.INVALID_APPWIDGET_ID
+        }.getOrDefault(false)
+        if (isPreviewPin) {
+            providePreviewContent(context)
+            return
+        }
+
         // Attempt an initial sync from any active system MediaSession (e.g. Spotify, YouTube Music)
         MediaSessionControllerHelper.syncFromActiveSession(context)
 
@@ -164,6 +178,40 @@ class MusicAppWidget : GlanceAppWidget() {
                     albumArtBitmap = cachedAlbumArt,
                     isPlaying = isPlaying,
                     isFavorite = isFavorite,
+                )
+            }
+        }
+    }
+
+    override suspend fun providePreview(context: Context, widgetCategory: Int) {
+        providePreviewContent(context)
+    }
+
+    private suspend fun providePreviewContent(context: Context) {
+        val active = MediaSessionControllerHelper.readActiveSessionSnapshot(context)
+        val previewArt = downsampleBitmapForWidget(context, active?.albumArt, maxWidthDp = 128, maxHeightDp = 128)
+        val track = if (active != null) {
+            MusicTrack(
+                title = active.title,
+                artist = active.artist,
+                album = active.album,
+                elapsedLabel = active.elapsedLabel,
+                durationLabel = active.durationLabel,
+                progress = active.progress,
+                isLiveSession = true,
+            )
+        } else {
+            SAMPLE_MUSIC_QUEUE.first()
+        }
+        val isPlaying = active?.isPlaying ?: true
+
+        provideContent {
+            MaterialYouGlanceTheme {
+                MusicWidgetContent(
+                    track = track,
+                    albumArtBitmap = previewArt,
+                    isPlaying = isPlaying,
+                    isFavorite = false,
                 )
             }
         }

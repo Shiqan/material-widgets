@@ -1,10 +1,7 @@
 package dev.shiqan.materialwidgets.ui.main
 
-import android.appwidget.AppWidgetManager
-import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import android.provider.Settings
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
@@ -80,6 +77,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.glance.appwidget.GlanceAppWidgetReceiver
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -102,9 +100,12 @@ import dev.shiqan.materialwidgets.widget.toggles.FlashlightToggleAppWidgetReceiv
 import dev.shiqan.materialwidgets.widget.toggles.RingerToggleAppWidgetReceiver
 import dev.shiqan.materialwidgets.widget.toggles.RotateToggleAppWidgetReceiver
 import dev.shiqan.materialwidgets.widget.toggles.WifiToggleAppWidgetReceiver
+import dev.shiqan.materialwidgets.widget.util.publishAllWidgetPreviews
+import dev.shiqan.materialwidgets.widget.util.requestPinGlanceWidget
 import dev.shiqan.materialwidgets.widget.weather.WeatherAppWidgetReceiver
 import dev.shiqan.materialwidgets.widget.weather.WeatherRepository
 import dev.shiqan.materialwidgets.widget.weather.formatTemp
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @Composable
@@ -120,9 +121,18 @@ fun MainScreen(
 @Composable
 internal fun MainScreen(data: List<String>, modifier: Modifier = Modifier) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     val lifecycleOwner = LocalLifecycleOwner.current
     var isMediaAccessEnabled by remember {
         mutableStateOf(MediaSessionControllerHelper.isNotificationListenerEnabled(context))
+    }
+
+    LaunchedEffect(context) {
+        publishAllWidgetPreviews(context)
+    }
+
+    val pinWidget: (Class<out GlanceAppWidgetReceiver>) -> Unit = { receiverClass ->
+        requestPinAppWidget(scope = scope, context = context, receiverClass = receiverClass)
     }
 
     DisposableEffect(lifecycleOwner, context) {
@@ -172,12 +182,7 @@ internal fun MainScreen(data: List<String>, modifier: Modifier = Modifier) {
                     icon = Icons.Rounded.AccessTime,
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                    onPinClick = {
-                        requestPinAppWidget(
-                            context = context,
-                            receiverClass = ClockAppWidgetReceiver::class.java,
-                        )
-                    },
+                    onPinClick = { pinWidget(ClockAppWidgetReceiver::class.java) },
                 )
             }
 
@@ -188,12 +193,7 @@ internal fun MainScreen(data: List<String>, modifier: Modifier = Modifier) {
                     icon = Icons.Rounded.CalendarMonth,
                     containerColor = MaterialTheme.colorScheme.inverseSurface,
                     contentColor = MaterialTheme.colorScheme.inverseOnSurface,
-                    onPinClick = {
-                        requestPinAppWidget(
-                            context = context,
-                            receiverClass = CalendarCardAppWidgetReceiver::class.java,
-                        )
-                    },
+                    onPinClick = { pinWidget(CalendarCardAppWidgetReceiver::class.java) },
                 )
             }
 
@@ -204,12 +204,7 @@ internal fun MainScreen(data: List<String>, modifier: Modifier = Modifier) {
                     icon = Icons.Rounded.AccessTime,
                     containerColor = MaterialTheme.colorScheme.secondaryContainer,
                     contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                    onPinClick = {
-                        requestPinAppWidget(
-                            context = context,
-                            receiverClass = CircleClockAppWidgetReceiver::class.java,
-                        )
-                    },
+                    onPinClick = { pinWidget(CircleClockAppWidgetReceiver::class.java) },
                 )
             }
 
@@ -220,12 +215,7 @@ internal fun MainScreen(data: List<String>, modifier: Modifier = Modifier) {
                     icon = Icons.Rounded.Cloud,
                     containerColor = MaterialTheme.colorScheme.secondaryContainer,
                     contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                    onPinClick = {
-                        requestPinAppWidget(
-                            context = context,
-                            receiverClass = WeatherAppWidgetReceiver::class.java,
-                        )
-                    },
+                    onPinClick = { pinWidget(WeatherAppWidgetReceiver::class.java) },
                 )
             }
 
@@ -240,12 +230,7 @@ internal fun MainScreen(data: List<String>, modifier: Modifier = Modifier) {
                     icon = Icons.Rounded.MusicNote,
                     containerColor = MaterialTheme.colorScheme.tertiaryContainer,
                     contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
-                    onPinClick = {
-                        requestPinAppWidget(
-                            context = context,
-                            receiverClass = MusicAppWidgetReceiver::class.java,
-                        )
-                    },
+                    onPinClick = { pinWidget(MusicAppWidgetReceiver::class.java) },
                 )
             }
 
@@ -256,12 +241,7 @@ internal fun MainScreen(data: List<String>, modifier: Modifier = Modifier) {
                     icon = Icons.Rounded.MusicNote,
                     containerColor = MaterialTheme.colorScheme.inverseSurface,
                     contentColor = MaterialTheme.colorScheme.inverseOnSurface,
-                    onPinClick = {
-                        requestPinAppWidget(
-                            context = context,
-                            receiverClass = MusicPillAppWidgetReceiver::class.java,
-                        )
-                    },
+                    onPinClick = { pinWidget(MusicPillAppWidgetReceiver::class.java) },
                 )
             }
 
@@ -272,12 +252,7 @@ internal fun MainScreen(data: List<String>, modifier: Modifier = Modifier) {
                     icon = Icons.Rounded.Wifi,
                     containerColor = MaterialTheme.colorScheme.tertiaryContainer,
                     contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
-                    onPinClick = {
-                        requestPinAppWidget(
-                            context = context,
-                            receiverClass = WifiToggleAppWidgetReceiver::class.java,
-                        )
-                    },
+                    onPinClick = { pinWidget(WifiToggleAppWidgetReceiver::class.java) },
                 )
             }
 
@@ -288,12 +263,7 @@ internal fun MainScreen(data: List<String>, modifier: Modifier = Modifier) {
                     icon = Icons.Rounded.SwapVert,
                     containerColor = MaterialTheme.colorScheme.secondaryContainer,
                     contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                    onPinClick = {
-                        requestPinAppWidget(
-                            context = context,
-                            receiverClass = DataToggleAppWidgetReceiver::class.java,
-                        )
-                    },
+                    onPinClick = { pinWidget(DataToggleAppWidgetReceiver::class.java) },
                 )
             }
 
@@ -304,12 +274,7 @@ internal fun MainScreen(data: List<String>, modifier: Modifier = Modifier) {
                     icon = Icons.Rounded.FlashlightOn,
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                    onPinClick = {
-                        requestPinAppWidget(
-                            context = context,
-                            receiverClass = FlashlightToggleAppWidgetReceiver::class.java,
-                        )
-                    },
+                    onPinClick = { pinWidget(FlashlightToggleAppWidgetReceiver::class.java) },
                 )
             }
 
@@ -320,12 +285,7 @@ internal fun MainScreen(data: List<String>, modifier: Modifier = Modifier) {
                     icon = Icons.Rounded.ScreenRotation,
                     containerColor = MaterialTheme.colorScheme.tertiaryContainer,
                     contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
-                    onPinClick = {
-                        requestPinAppWidget(
-                            context = context,
-                            receiverClass = RotateToggleAppWidgetReceiver::class.java,
-                        )
-                    },
+                    onPinClick = { pinWidget(RotateToggleAppWidgetReceiver::class.java) },
                 )
             }
 
@@ -336,12 +296,7 @@ internal fun MainScreen(data: List<String>, modifier: Modifier = Modifier) {
                     icon = Icons.Rounded.BatteryChargingFull,
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                    onPinClick = {
-                        requestPinAppWidget(
-                            context = context,
-                            receiverClass = BatteryAppWidgetReceiver::class.java,
-                        )
-                    },
+                    onPinClick = { pinWidget(BatteryAppWidgetReceiver::class.java) },
                 )
             }
 
@@ -352,12 +307,7 @@ internal fun MainScreen(data: List<String>, modifier: Modifier = Modifier) {
                     icon = Icons.Rounded.Memory,
                     containerColor = MaterialTheme.colorScheme.secondaryContainer,
                     contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                    onPinClick = {
-                        requestPinAppWidget(
-                            context = context,
-                            receiverClass = StorageRamAppWidgetReceiver::class.java,
-                        )
-                    },
+                    onPinClick = { pinWidget(StorageRamAppWidgetReceiver::class.java) },
                 )
             }
 
@@ -368,12 +318,7 @@ internal fun MainScreen(data: List<String>, modifier: Modifier = Modifier) {
                     icon = Icons.Rounded.Bluetooth,
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                    onPinClick = {
-                        requestPinAppWidget(
-                            context = context,
-                            receiverClass = BluetoothToggleAppWidgetReceiver::class.java,
-                        )
-                    },
+                    onPinClick = { pinWidget(BluetoothToggleAppWidgetReceiver::class.java) },
                 )
             }
 
@@ -384,12 +329,7 @@ internal fun MainScreen(data: List<String>, modifier: Modifier = Modifier) {
                     icon = Icons.Rounded.NotificationsActive,
                     containerColor = MaterialTheme.colorScheme.tertiaryContainer,
                     contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
-                    onPinClick = {
-                        requestPinAppWidget(
-                            context = context,
-                            receiverClass = RingerToggleAppWidgetReceiver::class.java,
-                        )
-                    },
+                    onPinClick = { pinWidget(RingerToggleAppWidgetReceiver::class.java) },
                 )
             }
 
@@ -829,13 +769,13 @@ private fun WidgetGalleryCard(
     }
 }
 
-private fun requestPinAppWidget(context: Context, receiverClass: Class<*>) {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-        val appWidgetManager = AppWidgetManager.getInstance(context)
-        val provider = ComponentName(context, receiverClass)
-        if (appWidgetManager.isRequestPinAppWidgetSupported) {
-            appWidgetManager.requestPinAppWidget(provider, null, null)
-        }
+private fun requestPinAppWidget(
+    scope: CoroutineScope,
+    context: Context,
+    receiverClass: Class<out GlanceAppWidgetReceiver>,
+) {
+    scope.launch {
+        requestPinGlanceWidget(context = context, receiverClass = receiverClass)
     }
 }
 

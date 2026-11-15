@@ -10,6 +10,7 @@ import android.os.Build
 import android.provider.Settings
 import androidx.annotation.DrawableRes
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
@@ -26,6 +27,7 @@ import androidx.glance.action.ActionParameters
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
+import androidx.glance.appwidget.PreviewSizeMode
 import androidx.glance.appwidget.SizeMode
 import androidx.glance.appwidget.action.ActionCallback
 import androidx.glance.appwidget.action.actionRunCallback
@@ -54,6 +56,12 @@ enum class QuickButtonShape {
     SCALLOP_12,
 }
 
+abstract class BaseQuickToggleAppWidget : GlanceAppWidget() {
+    override val stateDefinition: GlanceStateDefinition<*> = PreferencesGlanceStateDefinition
+    override val sizeMode: SizeMode = SizeMode.Exact
+    override val previewSizeMode: PreviewSizeMode = SizeMode.Responsive(setOf(DpSize(76.dp, 76.dp)))
+}
+
 // ---------------------------------------------------------------------------
 // 1. Wi-Fi Quick Button Widget (Scalloped Cookie Shape)
 // ---------------------------------------------------------------------------
@@ -62,25 +70,23 @@ class WifiToggleAppWidgetReceiver : GlanceAppWidgetReceiver() {
     override val glanceAppWidget: GlanceAppWidget = WifiToggleAppWidget()
 }
 
-class WifiToggleAppWidget : GlanceAppWidget() {
-    override val stateDefinition: GlanceStateDefinition<*> = PreferencesGlanceStateDefinition
-    override val sizeMode: SizeMode = SizeMode.Exact
+class WifiToggleAppWidget : BaseQuickToggleAppWidget() {
+    private fun createClickAction(): Action = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        actionStartActivity(
+            Intent(Settings.Panel.ACTION_WIFI).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            },
+        )
+    } else {
+        actionStartActivity(
+            Intent(Settings.ACTION_WIFI_SETTINGS).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            },
+        )
+    }
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
-        val wifiPanelAction = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            actionStartActivity(
-                Intent(Settings.Panel.ACTION_WIFI).apply {
-                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                },
-            )
-        } else {
-            actionStartActivity(
-                Intent(Settings.ACTION_WIFI_SETTINGS).apply {
-                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                },
-            )
-        }
-
+        val wifiPanelAction = createClickAction()
         provideContent {
             val isActive = currentState<Preferences>()[KEY_WIFI_ACTIVE] ?: true
             MaterialYouGlanceTheme {
@@ -89,6 +95,21 @@ class WifiToggleAppWidget : GlanceAppWidget() {
                     contentDescription = "Wi-Fi Settings",
                     shape = QuickButtonShape.SCALLOP_8,
                     isActive = isActive,
+                    onClick = wifiPanelAction,
+                )
+            }
+        }
+    }
+
+    override suspend fun providePreview(context: Context, widgetCategory: Int) {
+        val wifiPanelAction = createClickAction()
+        provideContent {
+            MaterialYouGlanceTheme {
+                QuickToggleButtonContent(
+                    iconRes = R.drawable.ic_toggle_wifi,
+                    contentDescription = "Wi-Fi Settings",
+                    shape = QuickButtonShape.SCALLOP_8,
+                    isActive = true,
                     onClick = wifiPanelAction,
                 )
             }
@@ -112,25 +133,23 @@ class DataToggleAppWidgetReceiver : GlanceAppWidgetReceiver() {
     override val glanceAppWidget: GlanceAppWidget = DataToggleAppWidget()
 }
 
-class DataToggleAppWidget : GlanceAppWidget() {
-    override val stateDefinition: GlanceStateDefinition<*> = PreferencesGlanceStateDefinition
-    override val sizeMode: SizeMode = SizeMode.Exact
+class DataToggleAppWidget : BaseQuickToggleAppWidget() {
+    private fun createClickAction(): Action = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        actionStartActivity(
+            Intent(Settings.Panel.ACTION_INTERNET_CONNECTIVITY).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            },
+        )
+    } else {
+        actionStartActivity(
+            Intent(Settings.ACTION_DATA_ROAMING_SETTINGS).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            },
+        )
+    }
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
-        val internetPanelAction = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            actionStartActivity(
-                Intent(Settings.Panel.ACTION_INTERNET_CONNECTIVITY).apply {
-                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                },
-            )
-        } else {
-            actionStartActivity(
-                Intent(Settings.ACTION_DATA_ROAMING_SETTINGS).apply {
-                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                },
-            )
-        }
-
+        val internetPanelAction = createClickAction()
         provideContent {
             val isActive = currentState<Preferences>()[KEY_DATA_ACTIVE] ?: false
             MaterialYouGlanceTheme {
@@ -139,6 +158,21 @@ class DataToggleAppWidget : GlanceAppWidget() {
                     contentDescription = "Mobile Data Settings",
                     shape = QuickButtonShape.CIRCLE,
                     isActive = isActive,
+                    onClick = internetPanelAction,
+                )
+            }
+        }
+    }
+
+    override suspend fun providePreview(context: Context, widgetCategory: Int) {
+        val internetPanelAction = createClickAction()
+        provideContent {
+            MaterialYouGlanceTheme {
+                QuickToggleButtonContent(
+                    iconRes = R.drawable.ic_toggle_data,
+                    contentDescription = "Mobile Data Settings",
+                    shape = QuickButtonShape.CIRCLE,
+                    isActive = false,
                     onClick = internetPanelAction,
                 )
             }
@@ -162,10 +196,7 @@ class FlashlightToggleAppWidgetReceiver : GlanceAppWidgetReceiver() {
     override val glanceAppWidget: GlanceAppWidget = FlashlightToggleAppWidget()
 }
 
-class FlashlightToggleAppWidget : GlanceAppWidget() {
-    override val stateDefinition: GlanceStateDefinition<*> = PreferencesGlanceStateDefinition
-    override val sizeMode: SizeMode = SizeMode.Exact
-
+class FlashlightToggleAppWidget : BaseQuickToggleAppWidget() {
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         provideContent {
             val isTorchOn = currentState<Preferences>()[KEY_FLASHLIGHT_ON] ?: false
@@ -175,6 +206,20 @@ class FlashlightToggleAppWidget : GlanceAppWidget() {
                     contentDescription = if (isTorchOn) "Turn Flashlight Off" else "Turn Flashlight On",
                     shape = QuickButtonShape.CIRCLE,
                     isActive = isTorchOn,
+                    onClick = actionRunCallback<ToggleFlashlightAction>(),
+                )
+            }
+        }
+    }
+
+    override suspend fun providePreview(context: Context, widgetCategory: Int) {
+        provideContent {
+            MaterialYouGlanceTheme {
+                QuickToggleButtonContent(
+                    iconRes = R.drawable.ic_toggle_flashlight,
+                    contentDescription = "Turn Flashlight On",
+                    shape = QuickButtonShape.CIRCLE,
+                    isActive = false,
                     onClick = actionRunCallback<ToggleFlashlightAction>(),
                 )
             }
@@ -229,21 +274,19 @@ class RotateToggleAppWidgetReceiver : GlanceAppWidgetReceiver() {
     override val glanceAppWidget: GlanceAppWidget = RotateToggleAppWidget()
 }
 
-class RotateToggleAppWidget : GlanceAppWidget() {
-    override val stateDefinition: GlanceStateDefinition<*> = PreferencesGlanceStateDefinition
-    override val sizeMode: SizeMode = SizeMode.Exact
+class RotateToggleAppWidget : BaseQuickToggleAppWidget() {
+    private fun readSystemAutoRotate(context: Context): Boolean = try {
+        Settings.System.getInt(
+            context.contentResolver,
+            Settings.System.ACCELEROMETER_ROTATION,
+            1,
+        ) == 1
+    } catch (_: Exception) {
+        true
+    }
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
-        val systemAutoRotate = try {
-            Settings.System.getInt(
-                context.contentResolver,
-                Settings.System.ACCELEROMETER_ROTATION,
-                1,
-            ) == 1
-        } catch (_: Exception) {
-            true
-        }
-
+        val systemAutoRotate = readSystemAutoRotate(context)
         provideContent {
             val prefs = currentState<Preferences>()
             val isRotateOn = prefs[KEY_ROTATE_ON] ?: systemAutoRotate
@@ -253,6 +296,21 @@ class RotateToggleAppWidget : GlanceAppWidget() {
                     contentDescription = "Toggle Auto-Rotate",
                     shape = QuickButtonShape.SCALLOP_12,
                     isActive = isRotateOn,
+                    onClick = actionRunCallback<ToggleAutoRotateAction>(),
+                )
+            }
+        }
+    }
+
+    override suspend fun providePreview(context: Context, widgetCategory: Int) {
+        val systemAutoRotate = readSystemAutoRotate(context)
+        provideContent {
+            MaterialYouGlanceTheme {
+                QuickToggleButtonContent(
+                    iconRes = R.drawable.ic_toggle_rotate,
+                    contentDescription = "Toggle Auto-Rotate",
+                    shape = QuickButtonShape.SCALLOP_12,
+                    isActive = systemAutoRotate,
                     onClick = actionRunCallback<ToggleAutoRotateAction>(),
                 )
             }
@@ -313,17 +371,15 @@ class BluetoothToggleAppWidgetReceiver : GlanceAppWidgetReceiver() {
     override val glanceAppWidget: GlanceAppWidget = BluetoothToggleAppWidget()
 }
 
-class BluetoothToggleAppWidget : GlanceAppWidget() {
-    override val stateDefinition: GlanceStateDefinition<*> = PreferencesGlanceStateDefinition
-    override val sizeMode: SizeMode = SizeMode.Exact
+class BluetoothToggleAppWidget : BaseQuickToggleAppWidget() {
+    private fun readSystemBluetoothEnabled(context: Context): Boolean = try {
+        context.getSystemService(BluetoothManager::class.java)?.adapter?.isEnabled ?: true
+    } catch (_: Exception) {
+        true
+    }
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
-        val systemBtEnabled = try {
-            context.getSystemService(BluetoothManager::class.java)?.adapter?.isEnabled ?: true
-        } catch (_: Exception) {
-            true
-        }
-
+        val systemBtEnabled = readSystemBluetoothEnabled(context)
         provideContent {
             val prefs = currentState<Preferences>()
             val isBtOn = prefs[KEY_BLUETOOTH_ON] ?: systemBtEnabled
@@ -333,6 +389,21 @@ class BluetoothToggleAppWidget : GlanceAppWidget() {
                     contentDescription = "Bluetooth Settings",
                     shape = QuickButtonShape.SCALLOP_8,
                     isActive = isBtOn,
+                    onClick = actionRunCallback<ToggleBluetoothAction>(),
+                )
+            }
+        }
+    }
+
+    override suspend fun providePreview(context: Context, widgetCategory: Int) {
+        val systemBtEnabled = readSystemBluetoothEnabled(context)
+        provideContent {
+            MaterialYouGlanceTheme {
+                QuickToggleButtonContent(
+                    iconRes = R.drawable.ic_toggle_bluetooth,
+                    contentDescription = "Bluetooth Settings",
+                    shape = QuickButtonShape.SCALLOP_8,
+                    isActive = systemBtEnabled,
                     onClick = actionRunCallback<ToggleBluetoothAction>(),
                 )
             }
@@ -385,38 +456,54 @@ class RingerToggleAppWidgetReceiver : GlanceAppWidgetReceiver() {
     override val glanceAppWidget: GlanceAppWidget = RingerToggleAppWidget()
 }
 
-class RingerToggleAppWidget : GlanceAppWidget() {
-    override val stateDefinition: GlanceStateDefinition<*> = PreferencesGlanceStateDefinition
-    override val sizeMode: SizeMode = SizeMode.Exact
+class RingerToggleAppWidget : BaseQuickToggleAppWidget() {
+    private fun readSystemRingerMode(context: Context): Int = try {
+        context.getSystemService(AudioManager::class.java)?.ringerMode
+            ?: AudioManager.RINGER_MODE_NORMAL
+    } catch (_: Exception) {
+        AudioManager.RINGER_MODE_NORMAL
+    }
+
+    private fun ringerVisuals(mode: Int): Triple<Int, String, Boolean> = when (mode) {
+        AudioManager.RINGER_MODE_VIBRATE -> Triple(
+            R.drawable.ic_toggle_ringer_vibrate,
+            "Ringer: Vibrate",
+            true,
+        )
+        AudioManager.RINGER_MODE_SILENT -> Triple(
+            R.drawable.ic_toggle_ringer_silent,
+            "Ringer: Silent",
+            false,
+        )
+        else -> Triple(
+            R.drawable.ic_toggle_ringer_normal,
+            "Ringer: Sound On",
+            true,
+        )
+    }
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
-        val systemRingerMode = try {
-            context.getSystemService(AudioManager::class.java)?.ringerMode
-                ?: AudioManager.RINGER_MODE_NORMAL
-        } catch (_: Exception) {
-            AudioManager.RINGER_MODE_NORMAL
-        }
-
+        val systemRingerMode = readSystemRingerMode(context)
         provideContent {
             val prefs = currentState<Preferences>()
             val mode = prefs[KEY_RINGER_MODE] ?: systemRingerMode
-            val (iconRes, desc, isActive) = when (mode) {
-                AudioManager.RINGER_MODE_VIBRATE -> Triple(
-                    R.drawable.ic_toggle_ringer_vibrate,
-                    "Ringer: Vibrate",
-                    true,
-                )
-                AudioManager.RINGER_MODE_SILENT -> Triple(
-                    R.drawable.ic_toggle_ringer_silent,
-                    "Ringer: Silent",
-                    false,
-                )
-                else -> Triple(
-                    R.drawable.ic_toggle_ringer_normal,
-                    "Ringer: Sound On",
-                    true,
+            val (iconRes, desc, isActive) = ringerVisuals(mode)
+            MaterialYouGlanceTheme {
+                QuickToggleButtonContent(
+                    iconRes = iconRes,
+                    contentDescription = desc,
+                    shape = QuickButtonShape.SCALLOP_12,
+                    isActive = isActive,
+                    onClick = actionRunCallback<CycleRingerModeAction>(),
                 )
             }
+        }
+    }
+
+    override suspend fun providePreview(context: Context, widgetCategory: Int) {
+        val systemRingerMode = readSystemRingerMode(context)
+        val (iconRes, desc, isActive) = ringerVisuals(systemRingerMode)
+        provideContent {
             MaterialYouGlanceTheme {
                 QuickToggleButtonContent(
                     iconRes = iconRes,
