@@ -67,6 +67,16 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 import kotlin.math.roundToInt
 
+data class HourlyForecast(
+    val hourLabel: String,
+    val tempCelsius: Int,
+    val weatherCode: Int = 2,
+) {
+    @get:DrawableRes
+    val iconRes: Int
+        get() = WeatherRepository.iconForWeatherCode(weatherCode)
+}
+
 data class WeatherSnapshot(
     val city: String,
     val condition: String,
@@ -77,22 +87,27 @@ data class WeatherSnapshot(
     val windKmh: Int,
     val uvIndex: String,
     @param:DrawableRes val iconRes: Int,
-    val forecastHours: List<Pair<String, Int>>,
+    val forecastHours: List<HourlyForecast>,
     val isLive: Boolean = false,
 )
 
 val SAMPLE_WEATHER_STATES = listOf(
     WeatherSnapshot(
         city = "Amsterdam",
-        condition = "Scattered Clouds",
+        condition = "Partly Cloudy",
         tempCelsius = 17,
         highCelsius = 19,
         lowCelsius = 11,
         humidityPercent = 72,
         windKmh = 21,
         uvIndex = "Mod",
-        iconRes = R.drawable.ic_weather_cloudy,
-        forecastHours = listOf("12 PM" to 17, "3 PM" to 18, "6 PM" to 15, "9 PM" to 13),
+        iconRes = R.drawable.ic_weather_partly_cloudy,
+        forecastHours = listOf(
+            HourlyForecast("12 PM", 17, 2),
+            HourlyForecast("3 PM", 18, 1),
+            HourlyForecast("6 PM", 15, 2),
+            HourlyForecast("9 PM", 13, 3),
+        ),
     ),
     WeatherSnapshot(
         city = "San Francisco",
@@ -104,7 +119,12 @@ val SAMPLE_WEATHER_STATES = listOf(
         windKmh = 14,
         uvIndex = "High",
         iconRes = R.drawable.ic_weather_sunny,
-        forecastHours = listOf("12 PM" to 22, "3 PM" to 24, "6 PM" to 19, "9 PM" to 16),
+        forecastHours = listOf(
+            HourlyForecast("12 PM", 22, 0),
+            HourlyForecast("3 PM", 24, 0),
+            HourlyForecast("6 PM", 19, 1),
+            HourlyForecast("9 PM", 16, 2),
+        ),
     ),
     WeatherSnapshot(
         city = "Tokyo",
@@ -116,7 +136,12 @@ val SAMPLE_WEATHER_STATES = listOf(
         windKmh = 18,
         uvIndex = "Low",
         iconRes = R.drawable.ic_weather_rainy,
-        forecastHours = listOf("12 PM" to 15, "3 PM" to 16, "6 PM" to 14, "9 PM" to 13),
+        forecastHours = listOf(
+            HourlyForecast("12 PM", 15, 61),
+            HourlyForecast("3 PM", 16, 63),
+            HourlyForecast("6 PM", 14, 80),
+            HourlyForecast("9 PM", 13, 3),
+        ),
     ),
 )
 
@@ -186,7 +211,7 @@ object WeatherRepository {
         val uv = p.getString(KEY_UV_INDEX, "Mod") ?: "Mod"
         val code = p.getInt(KEY_WEATHER_CODE, 2)
         val forecastRaw = p.getString(KEY_FORECAST_SERIALIZED, null)
-        val forecast = deserializeForecast(forecastRaw)
+        val forecast = deserializeForecast(forecastRaw, fallbackWeatherCode = code)
             .ifEmpty { SAMPLE_WEATHER_STATES.first().forecastHours }
 
         return WeatherSnapshot(
@@ -307,21 +332,26 @@ object WeatherRepository {
     internal fun resolveSnapshotFromPrefs(
         prefs: Preferences,
         fallbackSnapshot: WeatherSnapshot,
-    ): WeatherSnapshot = WeatherSnapshot(
-        city = prefs[WeatherAppWidget.KEY_CITY] ?: fallbackSnapshot.city,
-        condition = prefs[WeatherAppWidget.KEY_CONDITION] ?: fallbackSnapshot.condition,
-        tempCelsius = prefs[WeatherAppWidget.KEY_TEMP_C] ?: fallbackSnapshot.tempCelsius,
-        highCelsius = prefs[WeatherAppWidget.KEY_HIGH_C] ?: fallbackSnapshot.highCelsius,
-        lowCelsius = prefs[WeatherAppWidget.KEY_LOW_C] ?: fallbackSnapshot.lowCelsius,
-        humidityPercent = prefs[WeatherAppWidget.KEY_HUMIDITY] ?: fallbackSnapshot.humidityPercent,
-        windKmh = prefs[WeatherAppWidget.KEY_WIND_KMH] ?: fallbackSnapshot.windKmh,
-        uvIndex = prefs[WeatherAppWidget.KEY_UV_INDEX] ?: fallbackSnapshot.uvIndex,
-        iconRes = prefs[WeatherAppWidget.KEY_WEATHER_CODE]?.let(::iconForWeatherCode)
-            ?: fallbackSnapshot.iconRes,
-        forecastHours = deserializeForecast(prefs[WeatherAppWidget.KEY_FORECAST])
-            .ifEmpty { fallbackSnapshot.forecastHours },
-        isLive = (prefs[WeatherAppWidget.KEY_LAST_UPDATED] ?: 0L) > 0L || fallbackSnapshot.isLive,
-    )
+    ): WeatherSnapshot {
+        val resolvedCode = prefs[WeatherAppWidget.KEY_WEATHER_CODE]
+            ?: weatherCodeForIcon(fallbackSnapshot.iconRes)
+        return WeatherSnapshot(
+            city = prefs[WeatherAppWidget.KEY_CITY] ?: fallbackSnapshot.city,
+            condition = prefs[WeatherAppWidget.KEY_CONDITION] ?: fallbackSnapshot.condition,
+            tempCelsius = prefs[WeatherAppWidget.KEY_TEMP_C] ?: fallbackSnapshot.tempCelsius,
+            highCelsius = prefs[WeatherAppWidget.KEY_HIGH_C] ?: fallbackSnapshot.highCelsius,
+            lowCelsius = prefs[WeatherAppWidget.KEY_LOW_C] ?: fallbackSnapshot.lowCelsius,
+            humidityPercent = prefs[WeatherAppWidget.KEY_HUMIDITY] ?: fallbackSnapshot.humidityPercent,
+            windKmh = prefs[WeatherAppWidget.KEY_WIND_KMH] ?: fallbackSnapshot.windKmh,
+            uvIndex = prefs[WeatherAppWidget.KEY_UV_INDEX] ?: fallbackSnapshot.uvIndex,
+            iconRes = iconForWeatherCode(resolvedCode),
+            forecastHours = deserializeForecast(
+                serialized = prefs[WeatherAppWidget.KEY_FORECAST],
+                fallbackWeatherCode = resolvedCode,
+            ).ifEmpty { fallbackSnapshot.forecastHours },
+            isLive = (prefs[WeatherAppWidget.KEY_LAST_UPDATED] ?: 0L) > 0L || fallbackSnapshot.isLive,
+        )
+    }
 
     private fun resolveCoordinates(
         p: android.content.SharedPreferences,
@@ -365,7 +395,7 @@ object WeatherRepository {
         val url = "https://api.open-meteo.com/v1/forecast" +
             "?latitude=$latitude&longitude=$longitude" +
             "&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m" +
-            "&hourly=temperature_2m" +
+            "&hourly=temperature_2m,weather_code" +
             "&daily=temperature_2m_max,temperature_2m_min,uv_index_max" +
             "&temperature_unit=celsius&wind_speed_unit=kmh&timezone=auto&forecast_days=2"
 
@@ -387,7 +417,7 @@ object WeatherRepository {
         val uvMax = daily?.optJSONArray("uv_index_max")?.optDouble(0, 4.0) ?: 4.0
 
         val hourly = root.optJSONObject("hourly")
-        val forecastHours = parseUpcomingForecastHours(hourly, currentIsoTime, tempC)
+        val forecastHours = parseUpcomingForecastHours(hourly, currentIsoTime, tempC, weatherCode)
 
         return WeatherSnapshot(
             city = cityName,
@@ -408,10 +438,12 @@ object WeatherRepository {
         hourly: JSONObject?,
         currentIsoTime: String,
         fallbackTempC: Int,
-    ): List<Pair<String, Int>> {
+        fallbackWeatherCode: Int,
+    ): List<HourlyForecast> {
         if (hourly == null) return SAMPLE_WEATHER_STATES.first().forecastHours
         val times = hourly.optJSONArray("time") ?: return SAMPLE_WEATHER_STATES.first().forecastHours
         val temps = hourly.optJSONArray("temperature_2m") ?: return SAMPLE_WEATHER_STATES.first().forecastHours
+        val codes = hourly.optJSONArray("weather_code")
 
         val currentHourPrefix = currentIsoTime.take(13) // "YYYY-MM-DDTHH"
         var startIndex = 0
@@ -424,7 +456,7 @@ object WeatherRepository {
             }
         }
 
-        val result = mutableListOf<Pair<String, Int>>()
+        val result = mutableListOf<HourlyForecast>()
         val offsets = listOf(1, 4, 7, 10)
         for (offset in offsets) {
             val idx = (startIndex + offset).coerceAtMost(times.length() - 1)
@@ -432,7 +464,8 @@ object WeatherRepository {
                 val timeStr = times.optString(idx)
                 val label = formatIsoHourLabel(timeStr)
                 val temp = temps.optDouble(idx, fallbackTempC.toDouble()).roundToInt()
-                result.add(label to temp)
+                val code = codes?.optInt(idx, fallbackWeatherCode) ?: fallbackWeatherCode
+                result.add(HourlyForecast(label, temp, code))
             }
         }
         return if (result.size == 4) result else SAMPLE_WEATHER_STATES.first().forecastHours
@@ -487,14 +520,24 @@ object WeatherRepository {
     @DrawableRes
     fun iconForWeatherCode(code: Int): Int = when (code) {
         0, 1 -> R.drawable.ic_weather_sunny
-        2, 3, 45, 48 -> R.drawable.ic_weather_cloudy
-        else -> R.drawable.ic_weather_rainy
+        2 -> R.drawable.ic_weather_partly_cloudy
+        3 -> R.drawable.ic_weather_cloudy
+        45, 48 -> R.drawable.ic_weather_foggy
+        71, 73, 75, 77, 85, 86 -> R.drawable.ic_weather_snowy
+        95, 96, 99 -> R.drawable.ic_weather_thunderstorm
+        51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82 -> R.drawable.ic_weather_rainy
+        else -> R.drawable.ic_weather_partly_cloudy
     }
 
     private fun weatherCodeForIcon(@DrawableRes iconRes: Int): Int = when (iconRes) {
         R.drawable.ic_weather_sunny -> 0
-        R.drawable.ic_weather_cloudy -> 2
-        else -> 61
+        R.drawable.ic_weather_partly_cloudy -> 2
+        R.drawable.ic_weather_cloudy -> 3
+        R.drawable.ic_weather_foggy -> 45
+        R.drawable.ic_weather_snowy -> 71
+        R.drawable.ic_weather_thunderstorm -> 95
+        R.drawable.ic_weather_rainy -> 61
+        else -> 2
     }
 
     private fun uvLabel(uv: Double): String = when {
@@ -504,16 +547,20 @@ object WeatherRepository {
         else -> "V.High"
     }
 
-    fun serializeForecast(hours: List<Pair<String, Int>>): String =
-        hours.joinToString("|") { "${it.first}=${it.second}" }
+    fun serializeForecast(hours: List<HourlyForecast>): String =
+        hours.joinToString("|") { "${it.hourLabel}=${it.tempCelsius}=${it.weatherCode}" }
 
-    fun deserializeForecast(serialized: String?): List<Pair<String, Int>> {
+    fun deserializeForecast(
+        serialized: String?,
+        fallbackWeatherCode: Int = 2,
+    ): List<HourlyForecast> {
         if (serialized.isNullOrBlank()) return emptyList()
         return serialized.split("|").mapNotNull { entry ->
             val parts = entry.split("=")
-            if (parts.size == 2) {
+            if (parts.size >= 2) {
                 val temp = parts[1].toIntOrNull() ?: return@mapNotNull null
-                parts[0] to temp
+                val code = parts.getOrNull(2)?.toIntOrNull() ?: fallbackWeatherCode
+                HourlyForecast(parts[0], temp, code)
             } else {
                 null
             }
@@ -544,32 +591,7 @@ class WeatherAppWidget : GlanceAppWidget() {
         provideContent {
             val prefs = currentState<Preferences>()
             val useFahrenheit = prefs[KEY_USE_FAHRENHEIT] ?: fallbackFahrenheit
-            val city = prefs[KEY_CITY] ?: fallbackSnapshot.city
-            val condition = prefs[KEY_CONDITION] ?: fallbackSnapshot.condition
-            val tempC = prefs[KEY_TEMP_C] ?: fallbackSnapshot.tempCelsius
-            val highC = prefs[KEY_HIGH_C] ?: fallbackSnapshot.highCelsius
-            val lowC = prefs[KEY_LOW_C] ?: fallbackSnapshot.lowCelsius
-            val humidity = prefs[KEY_HUMIDITY] ?: fallbackSnapshot.humidityPercent
-            val wind = prefs[KEY_WIND_KMH] ?: fallbackSnapshot.windKmh
-            val uv = prefs[KEY_UV_INDEX] ?: fallbackSnapshot.uvIndex
-            val iconRes = prefs[KEY_WEATHER_CODE]?.let { WeatherRepository.iconForWeatherCode(it) }
-                ?: fallbackSnapshot.iconRes
-            val forecast = WeatherRepository.deserializeForecast(prefs[KEY_FORECAST])
-                .ifEmpty { fallbackSnapshot.forecastHours }
-
-            val weather = WeatherSnapshot(
-                city = city,
-                condition = condition,
-                tempCelsius = tempC,
-                highCelsius = highC,
-                lowCelsius = lowC,
-                humidityPercent = humidity,
-                windKmh = wind,
-                uvIndex = uv,
-                iconRes = iconRes,
-                forecastHours = forecast,
-                isLive = (prefs[KEY_LAST_UPDATED] ?: 0L) > 0L || fallbackSnapshot.isLive,
-            )
+            val weather = WeatherRepository.resolveSnapshotFromPrefs(prefs, fallbackSnapshot)
 
             MaterialYouGlanceTheme {
                 WeatherWidgetContent(
@@ -656,6 +678,8 @@ fun WeatherWidgetContent(
     val unitLabel = if (useFahrenheit) "F" else "C"
 
     if (size.width >= 240.dp) {
+        val isCompactHeight = size.height < 145.dp
+        val badgeSize = if (isCompactHeight) 48.dp else 56.dp
         // Wide 4x2 expressive Material You weather card with forecast & metric pills
         Column(
             modifier = GlanceModifier
@@ -663,7 +687,7 @@ fun WeatherWidgetContent(
                 .appWidgetBackground()
                 .background(GlanceTheme.colors.secondaryContainer)
                 .cornerRadius(28.dp)
-                .padding(14.dp),
+                .padding(if (isCompactHeight) 12.dp else 14.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Row(
@@ -687,6 +711,7 @@ fun WeatherWidgetContent(
                                     fontSize = 12.sp,
                                     fontWeight = FontWeight.Bold,
                                 ),
+                                maxLines = 1,
                             )
                         }
                         Spacer(modifier = GlanceModifier.width(6.dp))
@@ -697,15 +722,16 @@ fun WeatherWidgetContent(
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Medium,
                             ),
+                            maxLines = 1,
                         )
                     }
-                    Spacer(modifier = GlanceModifier.height(4.dp))
+                    Spacer(modifier = GlanceModifier.height(if (isCompactHeight) 2.dp else 4.dp))
                     Row(verticalAlignment = Alignment.Bottom) {
                         Text(
                             text = "${formatTemp(weather.tempCelsius, useFahrenheit)}$unitLabel",
                             style = TextStyle(
                                 color = GlanceTheme.colors.onSecondaryContainer,
-                                fontSize = 36.sp,
+                                fontSize = if (isCompactHeight) 32.sp else 36.sp,
                                 fontWeight = FontWeight.Bold,
                             ),
                             modifier = GlanceModifier.clickable(actionRunCallback<ToggleTemperatureUnitAction>()),
@@ -726,7 +752,7 @@ fun WeatherWidgetContent(
                 Box(
                     contentAlignment = Alignment.Center,
                     modifier = GlanceModifier
-                        .size(56.dp)
+                        .size(badgeSize)
                         .background(
                             imageProvider = ImageProvider(R.drawable.bg_scalloped_cookie),
                             colorFilter = ColorFilter.tint(GlanceTheme.colors.tertiaryContainer),
@@ -737,43 +763,74 @@ fun WeatherWidgetContent(
                         provider = ImageProvider(weather.iconRes),
                         contentDescription = "Refresh ${weather.condition}",
                         colorFilter = ColorFilter.tint(GlanceTheme.colors.onTertiaryContainer),
-                        modifier = GlanceModifier.size(28.dp),
+                        modifier = GlanceModifier.size(badgeSize / 2),
                     )
                 }
             }
 
-            Spacer(modifier = GlanceModifier.height(10.dp))
+            Spacer(modifier = GlanceModifier.height(if (isCompactHeight) 6.dp else 8.dp))
 
-            // Hourly forecast / metric pills row
+            // Hourly forecast pills row with per-hour weather icons
             Row(
                 modifier = GlanceModifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                weather.forecastHours.forEachIndexed { idx, (hourLabel, tempC) ->
+                weather.forecastHours.forEachIndexed { idx, hour ->
                     Column(
                         modifier = GlanceModifier
                             .defaultWeight()
                             .background(GlanceTheme.colors.surface)
                             .cornerRadius(16.dp)
-                            .padding(vertical = 6.dp, horizontal = 4.dp),
+                            .padding(vertical = if (isCompactHeight) 4.dp else 5.dp, horizontal = 4.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
                         Text(
-                            text = hourLabel,
+                            text = hour.hourLabel,
                             style = TextStyle(
                                 color = GlanceTheme.colors.onSurfaceVariant,
                                 fontSize = 10.sp,
                                 fontWeight = FontWeight.Medium,
                             ),
+                            maxLines = 1,
                         )
-                        Text(
-                            text = formatTemp(tempC, useFahrenheit),
-                            style = TextStyle(
-                                color = GlanceTheme.colors.onSurface,
-                                fontSize = 13.sp,
-                                fontWeight = FontWeight.Bold,
-                            ),
-                        )
+                        Spacer(modifier = GlanceModifier.height(2.dp))
+                        if (isCompactHeight) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Image(
+                                    provider = ImageProvider(hour.iconRes),
+                                    contentDescription = WeatherRepository.conditionLabelForCode(hour.weatherCode),
+                                    colorFilter = ColorFilter.tint(GlanceTheme.colors.primary),
+                                    modifier = GlanceModifier.size(14.dp),
+                                )
+                                Spacer(modifier = GlanceModifier.width(3.dp))
+                                Text(
+                                    text = formatTemp(hour.tempCelsius, useFahrenheit),
+                                    style = TextStyle(
+                                        color = GlanceTheme.colors.onSurface,
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.Bold,
+                                    ),
+                                    maxLines = 1,
+                                )
+                            }
+                        } else {
+                            Image(
+                                provider = ImageProvider(hour.iconRes),
+                                contentDescription = WeatherRepository.conditionLabelForCode(hour.weatherCode),
+                                colorFilter = ColorFilter.tint(GlanceTheme.colors.primary),
+                                modifier = GlanceModifier.size(18.dp),
+                            )
+                            Spacer(modifier = GlanceModifier.height(2.dp))
+                            Text(
+                                text = formatTemp(hour.tempCelsius, useFahrenheit),
+                                style = TextStyle(
+                                    color = GlanceTheme.colors.onSurface,
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.Bold,
+                                ),
+                                maxLines = 1,
+                            )
+                        }
                     }
                     if (idx < weather.forecastHours.lastIndex) {
                         Spacer(modifier = GlanceModifier.width(6.dp))

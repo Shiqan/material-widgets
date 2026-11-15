@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <!-- Sun disc peeking behind upper-right of cloud -->
+    <path
+        android:fillColor="@android:color/white"
+        android:pathData="M13.0,8.5 A2.5,2.5 0 1 0 18.0,8.5 A2.5,2.5 0 1 0 13.0,8.5 Z" />
+    <!-- Sun rays -->
+    <path
+        android:fillColor="@android:color/white"
+        android:pathData="M16.20,4.60 L16.20,3.50 A0.70,0.70 0 0 1 14.80,3.50 L14.80,4.60 A0.70,0.70 0 0 1 16.20,4.60 Z M18.75,6.24 L19.53,5.46 A0.70,0.70 0 0 1 18.54,4.47 L17.76,5.25 A0.70,0.70 0 0 1 18.75,6.24 Z M19.40,9.20 L20.50,9.20 A0.70,0.70 0 0 1 20.50,7.80 L19.40,7.80 A0.70,0.70 0 0 1 19.40,9.20 Z M17.76,11.75 L18.54,12.53 A0.70,0.70 0 0 1 19.53,11.54 L18.75,10.76 A0.70,0.70 0 0 1 17.76,11.75 Z M13.24,5.25 L12.46,4.47 A0.70,0.70 0 0 1 11.47,5.46 L12.25,6.24 A0.70,0.70 0 0 1 13.24,5.25 Z" />
+    <!-- Foreground cloud -->
+    <path
+        android:fillColor="@android:color/white"
+        android:pathData="M15.01,14.03 C14.50,11.44 12.23,9.50 9.50,9.50 7.33,9.50 5.45,10.73 4.51,12.53 2.26,12.77 0.50,14.68 0.50,17.00 c0,2.48 2.02,4.50 4.50,4.50 h9.75 c2.07,0 3.75,-1.68 3.75,-3.75 0,-1.98 -1.54,-3.59 -3.49,-3.72 Z" />
+</vector>
