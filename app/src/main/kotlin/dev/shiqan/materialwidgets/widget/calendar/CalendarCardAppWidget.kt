@@ -54,7 +54,7 @@ class CalendarCardAppWidgetReceiver : GlanceAppWidgetReceiver() {
 
 /**
  * 2x2 Material You Date Card Widget matching the reference showcase:
- * - Rounded card background (`inverseSurface`)
+ * - Rounded card background (`secondaryContainer`)
  * - Year ("2026") and Month ("November") stacked at top center
  * - 3-day horizontal strip at bottom: Yesterday | Scalloped Today Badge | Tomorrow
  */
@@ -111,7 +111,7 @@ fun CalendarCardWidgetContent(today: LocalDate = LocalDate.now()) {
         modifier = GlanceModifier
             .fillMaxSize()
             .appWidgetBackground()
-            .background(GlanceTheme.colors.inverseSurface)
+            .background(GlanceTheme.colors.secondaryContainer)
             .cornerRadius(28.dp)
             .clickable(actionStartActivity(calendarIntent))
             .padding(14.dp),
@@ -122,7 +122,7 @@ fun CalendarCardWidgetContent(today: LocalDate = LocalDate.now()) {
         Text(
             text = yearText,
             style = TextStyle(
-                color = GlanceTheme.colors.inverseOnSurface,
+                color = GlanceTheme.colors.onSecondaryContainer,
                 fontSize = 13.sp,
                 fontWeight = FontWeight.Medium,
                 textAlign = TextAlign.Center,
@@ -131,7 +131,7 @@ fun CalendarCardWidgetContent(today: LocalDate = LocalDate.now()) {
         Text(
             text = monthText,
             style = TextStyle(
-                color = GlanceTheme.colors.inversePrimary,
+                color = GlanceTheme.colors.primary,
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center,
@@ -155,7 +155,7 @@ fun CalendarCardWidgetContent(today: LocalDate = LocalDate.now()) {
                 Text(
                     text = yesterday.format(dayNameFormatter),
                     style = TextStyle(
-                        color = GlanceTheme.colors.inverseOnSurface,
+                        color = GlanceTheme.colors.onSecondaryContainer,
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Normal,
                     ),
@@ -163,7 +163,7 @@ fun CalendarCardWidgetContent(today: LocalDate = LocalDate.now()) {
                 Text(
                     text = yesterday.format(dayNumFormatter),
                     style = TextStyle(
-                        color = GlanceTheme.colors.inverseOnSurface,
+                        color = GlanceTheme.colors.onSecondaryContainer,
                         fontSize = 15.sp,
                         fontWeight = FontWeight.Bold,
                     ),
@@ -213,7 +213,7 @@ fun CalendarCardWidgetContent(today: LocalDate = LocalDate.now()) {
                 Text(
                     text = tomorrow.format(dayNameFormatter),
                     style = TextStyle(
-                        color = GlanceTheme.colors.inverseOnSurface,
+                        color = GlanceTheme.colors.onSecondaryContainer,
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Normal,
                     ),
@@ -221,7 +221,7 @@ fun CalendarCardWidgetContent(today: LocalDate = LocalDate.now()) {
                 Text(
                     text = tomorrow.format(dayNumFormatter),
                     style = TextStyle(
-                        color = GlanceTheme.colors.inverseOnSurface,
+                        color = GlanceTheme.colors.onSecondaryContainer,
                         fontSize = 15.sp,
                         fontWeight = FontWeight.Bold,
                     ),

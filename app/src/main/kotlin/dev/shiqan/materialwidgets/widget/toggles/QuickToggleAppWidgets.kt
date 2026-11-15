@@ -6,7 +6,7 @@ import android.content.Intent
 import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraManager
 import android.media.AudioManager
-import android.os.Build
+import android.net.wifi.WifiManager
 import android.provider.Settings
 import androidx.annotation.DrawableRes
 import androidx.compose.runtime.Composable
@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.glance.ColorFilter
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
@@ -26,6 +27,7 @@ import androidx.glance.action.Action
 import androidx.glance.action.ActionParameters
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
+import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
 import androidx.glance.appwidget.PreviewSizeMode
 import androidx.glance.appwidget.SizeMode
@@ -48,7 +50,9 @@ import androidx.glance.state.GlanceStateDefinition
 import androidx.glance.state.PreferencesGlanceStateDefinition
 import dev.shiqan.materialwidgets.R
 import dev.shiqan.materialwidgets.widget.theme.MaterialYouGlanceTheme
+import dev.shiqan.materialwidgets.widget.util.refreshWidgetPreview
 import dev.shiqan.materialwidgets.widget.util.showWidgetErrorFallback
+import kotlin.reflect.KClass
 
 enum class QuickButtonShape {
     CIRCLE,
@@ -56,14 +60,130 @@ enum class QuickButtonShape {
     SCALLOP_12,
 }
 
+enum class QuickButtonStyle(val id: String, val label: String) {
+    ROUND("round", "Round (Default)"),
+    CURVY("curvy", "Curvy");
+
+    fun toShape(): QuickButtonShape = when (this) {
+        ROUND -> QuickButtonShape.CIRCLE
+        CURVY -> QuickButtonShape.SCALLOP_8
+    }
+
+    companion object {
+        val DEFAULT = ROUND
+
+        fun fromId(id: String?): QuickButtonStyle =
+            entries.firstOrNull { it.id == id } ?: DEFAULT
+    }
+}
+
+enum class QuickToggleType(val prefKey: String) {
+    WIFI("style_wifi"),
+    DATA("style_data"),
+    FLASHLIGHT("style_flashlight"),
+    ROTATE("style_rotate"),
+    BLUETOOTH("style_bluetooth"),
+    RINGER("style_ringer"),
+}
+
+/**
+ * Persists user-selected Quick Button shapes (Round default vs. Curvy scalloped)
+ * and pushes updates to pinned Glance widgets and system previews.
+ */
+object QuickToggleStyleRepository {
+    private const val PREFS_NAME = "quick_toggle_style_prefs"
+
+    private fun prefs(context: Context) =
+        context.applicationContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+
+    fun getStyle(context: Context, type: QuickToggleType): QuickButtonStyle =
+        QuickButtonStyle.fromId(prefs(context).getString(type.prefKey, QuickButtonStyle.DEFAULT.id))
+
+    fun getAllStyles(context: Context): Map<QuickToggleType, QuickButtonStyle> =
+        QuickToggleType.entries.associateWith { getStyle(context, it) }
+
+    suspend fun setStyle(context: Context, type: QuickToggleType, style: QuickButtonStyle) {
+        prefs(context).edit().putString(type.prefKey, style.id).apply()
+        pushStyleToWidget(context, type, style)
+    }
+
+    suspend fun setAllStyles(context: Context, style: QuickButtonStyle) {
+        val editor = prefs(context).edit()
+        for (type in QuickToggleType.entries) {
+            editor.putString(type.prefKey, style.id)
+        }
+        editor.apply()
+        for (type in QuickToggleType.entries) {
+            pushStyleToWidget(context, type, style)
+        }
+    }
+
+    private suspend fun pushStyleToWidget(
+        context: Context,
+        type: QuickToggleType,
+        style: QuickButtonStyle,
+    ) {
+        val (widgetClass, receiverClass, createWidget) = widgetDescriptor(type)
+        val manager = GlanceAppWidgetManager(context)
+        val glanceIds = manager.getGlanceIds(widgetClass)
+        for (glanceId in glanceIds) {
+            updateAppWidgetState(context, glanceId) { glancePrefs ->
+                glancePrefs[BaseQuickToggleAppWidget.KEY_BUTTON_STYLE] = style.id
+            }
+            createWidget().update(context, glanceId)
+        }
+        refreshWidgetPreview(context, receiverClass)
+    }
+
+    private fun widgetDescriptor(
+        type: QuickToggleType,
+    ): Triple<Class<out GlanceAppWidget>, KClass<out GlanceAppWidgetReceiver>, () -> GlanceAppWidget> =
+        when (type) {
+            QuickToggleType.WIFI -> Triple(
+                WifiToggleAppWidget::class.java,
+                WifiToggleAppWidgetReceiver::class,
+                ::WifiToggleAppWidget,
+            )
+            QuickToggleType.DATA -> Triple(
+                DataToggleAppWidget::class.java,
+                DataToggleAppWidgetReceiver::class,
+                ::DataToggleAppWidget,
+            )
+            QuickToggleType.FLASHLIGHT -> Triple(
+                FlashlightToggleAppWidget::class.java,
+                FlashlightToggleAppWidgetReceiver::class,
+                ::FlashlightToggleAppWidget,
+            )
+            QuickToggleType.ROTATE -> Triple(
+                RotateToggleAppWidget::class.java,
+                RotateToggleAppWidgetReceiver::class,
+                ::RotateToggleAppWidget,
+            )
+            QuickToggleType.BLUETOOTH -> Triple(
+                BluetoothToggleAppWidget::class.java,
+                BluetoothToggleAppWidgetReceiver::class,
+                ::BluetoothToggleAppWidget,
+            )
+            QuickToggleType.RINGER -> Triple(
+                RingerToggleAppWidget::class.java,
+                RingerToggleAppWidgetReceiver::class,
+                ::RingerToggleAppWidget,
+            )
+        }
+}
+
 abstract class BaseQuickToggleAppWidget : GlanceAppWidget() {
     override val stateDefinition: GlanceStateDefinition<*> = PreferencesGlanceStateDefinition
     override val sizeMode: SizeMode = SizeMode.Exact
     override val previewSizeMode: PreviewSizeMode = SizeMode.Responsive(setOf(DpSize(76.dp, 76.dp)))
+
+    companion object {
+        val KEY_BUTTON_STYLE = stringPreferencesKey("quick_toggle_button_style")
+    }
 }
 
 // ---------------------------------------------------------------------------
-// 1. Wi-Fi Quick Button Widget (Scalloped Cookie Shape)
+// 1. Wi-Fi Quick Button Widget
 // ---------------------------------------------------------------------------
 
 class WifiToggleAppWidgetReceiver : GlanceAppWidgetReceiver() {
@@ -71,29 +191,33 @@ class WifiToggleAppWidgetReceiver : GlanceAppWidgetReceiver() {
 }
 
 class WifiToggleAppWidget : BaseQuickToggleAppWidget() {
-    private fun createClickAction(): Action = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-        actionStartActivity(
-            Intent(Settings.Panel.ACTION_WIFI).apply {
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK
-            },
-        )
-    } else {
-        actionStartActivity(
-            Intent(Settings.ACTION_WIFI_SETTINGS).apply {
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK
-            },
-        )
+    private fun readSystemWifiEnabled(context: Context): Boolean = try {
+        context.applicationContext.getSystemService(WifiManager::class.java)?.isWifiEnabled ?: true
+    } catch (_: Exception) {
+        true
     }
 
+    private fun createClickAction(context: Context): Action =
+        actionStartActivity(
+            QuickSettingsTrampolineActivity.createIntent(
+                context = context,
+                target = QuickSettingsTrampolineActivity.TARGET_WIFI,
+            ),
+        )
+
     override suspend fun provideGlance(context: Context, id: GlanceId) {
-        val wifiPanelAction = createClickAction()
+        val wifiPanelAction = createClickAction(context)
+        val systemWifiEnabled = readSystemWifiEnabled(context)
+        val fallbackStyle = QuickToggleStyleRepository.getStyle(context, QuickToggleType.WIFI)
         provideContent {
-            val isActive = currentState<Preferences>()[KEY_WIFI_ACTIVE] ?: true
+            val prefs = currentState<Preferences>()
+            val isActive = prefs[KEY_WIFI_ACTIVE] ?: systemWifiEnabled
+            val style = prefs[KEY_BUTTON_STYLE]?.let(QuickButtonStyle::fromId) ?: fallbackStyle
             MaterialYouGlanceTheme {
                 QuickToggleButtonContent(
                     iconRes = R.drawable.ic_toggle_wifi,
                     contentDescription = "Wi-Fi Settings",
-                    shape = QuickButtonShape.SCALLOP_8,
+                    shape = style.toShape(),
                     isActive = isActive,
                     onClick = wifiPanelAction,
                 )
@@ -102,14 +226,16 @@ class WifiToggleAppWidget : BaseQuickToggleAppWidget() {
     }
 
     override suspend fun providePreview(context: Context, widgetCategory: Int) {
-        val wifiPanelAction = createClickAction()
+        val wifiPanelAction = createClickAction(context)
+        val systemWifiEnabled = readSystemWifiEnabled(context)
+        val style = QuickToggleStyleRepository.getStyle(context, QuickToggleType.WIFI)
         provideContent {
             MaterialYouGlanceTheme {
                 QuickToggleButtonContent(
                     iconRes = R.drawable.ic_toggle_wifi,
                     contentDescription = "Wi-Fi Settings",
-                    shape = QuickButtonShape.SCALLOP_8,
-                    isActive = true,
+                    shape = style.toShape(),
+                    isActive = systemWifiEnabled,
                     onClick = wifiPanelAction,
                 )
             }
@@ -126,7 +252,7 @@ class WifiToggleAppWidget : BaseQuickToggleAppWidget() {
 }
 
 // ---------------------------------------------------------------------------
-// 2. Mobile Data Quick Button Widget (Circular Shape)
+// 2. Mobile Data Quick Button Widget
 // ---------------------------------------------------------------------------
 
 class DataToggleAppWidgetReceiver : GlanceAppWidgetReceiver() {
@@ -134,46 +260,52 @@ class DataToggleAppWidgetReceiver : GlanceAppWidgetReceiver() {
 }
 
 class DataToggleAppWidget : BaseQuickToggleAppWidget() {
-    private fun createClickAction(): Action = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-        actionStartActivity(
-            Intent(Settings.Panel.ACTION_INTERNET_CONNECTIVITY).apply {
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK
-            },
-        )
-    } else {
-        actionStartActivity(
-            Intent(Settings.ACTION_DATA_ROAMING_SETTINGS).apply {
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK
-            },
-        )
+    private fun readSystemMobileDataEnabled(context: Context): Boolean = try {
+        Settings.Global.getInt(context.contentResolver, "mobile_data", 1) == 1
+    } catch (_: Exception) {
+        true
     }
 
+    private fun createClickAction(context: Context): Action =
+        actionStartActivity(
+            QuickSettingsTrampolineActivity.createIntent(
+                context = context,
+                target = QuickSettingsTrampolineActivity.TARGET_MOBILE_DATA,
+            ),
+        )
+
     override suspend fun provideGlance(context: Context, id: GlanceId) {
-        val internetPanelAction = createClickAction()
+        val dataPanelAction = createClickAction(context)
+        val systemDataEnabled = readSystemMobileDataEnabled(context)
+        val fallbackStyle = QuickToggleStyleRepository.getStyle(context, QuickToggleType.DATA)
         provideContent {
-            val isActive = currentState<Preferences>()[KEY_DATA_ACTIVE] ?: false
+            val prefs = currentState<Preferences>()
+            val isActive = prefs[KEY_DATA_ACTIVE] ?: systemDataEnabled
+            val style = prefs[KEY_BUTTON_STYLE]?.let(QuickButtonStyle::fromId) ?: fallbackStyle
             MaterialYouGlanceTheme {
                 QuickToggleButtonContent(
                     iconRes = R.drawable.ic_toggle_data,
                     contentDescription = "Mobile Data Settings",
-                    shape = QuickButtonShape.CIRCLE,
+                    shape = style.toShape(),
                     isActive = isActive,
-                    onClick = internetPanelAction,
+                    onClick = dataPanelAction,
                 )
             }
         }
     }
 
     override suspend fun providePreview(context: Context, widgetCategory: Int) {
-        val internetPanelAction = createClickAction()
+        val dataPanelAction = createClickAction(context)
+        val systemDataEnabled = readSystemMobileDataEnabled(context)
+        val style = QuickToggleStyleRepository.getStyle(context, QuickToggleType.DATA)
         provideContent {
             MaterialYouGlanceTheme {
                 QuickToggleButtonContent(
                     iconRes = R.drawable.ic_toggle_data,
                     contentDescription = "Mobile Data Settings",
-                    shape = QuickButtonShape.CIRCLE,
-                    isActive = false,
-                    onClick = internetPanelAction,
+                    shape = style.toShape(),
+                    isActive = systemDataEnabled,
+                    onClick = dataPanelAction,
                 )
             }
         }
@@ -189,7 +321,7 @@ class DataToggleAppWidget : BaseQuickToggleAppWidget() {
 }
 
 // ---------------------------------------------------------------------------
-// 3. Flashlight / Torch Quick Button Widget (Circular Shape)
+// 3. Flashlight / Torch Quick Button Widget
 // ---------------------------------------------------------------------------
 
 class FlashlightToggleAppWidgetReceiver : GlanceAppWidgetReceiver() {
@@ -198,13 +330,16 @@ class FlashlightToggleAppWidgetReceiver : GlanceAppWidgetReceiver() {
 
 class FlashlightToggleAppWidget : BaseQuickToggleAppWidget() {
     override suspend fun provideGlance(context: Context, id: GlanceId) {
+        val fallbackStyle = QuickToggleStyleRepository.getStyle(context, QuickToggleType.FLASHLIGHT)
         provideContent {
-            val isTorchOn = currentState<Preferences>()[KEY_FLASHLIGHT_ON] ?: false
+            val prefs = currentState<Preferences>()
+            val isTorchOn = prefs[KEY_FLASHLIGHT_ON] ?: false
+            val style = prefs[KEY_BUTTON_STYLE]?.let(QuickButtonStyle::fromId) ?: fallbackStyle
             MaterialYouGlanceTheme {
                 QuickToggleButtonContent(
                     iconRes = R.drawable.ic_toggle_flashlight,
                     contentDescription = if (isTorchOn) "Turn Flashlight Off" else "Turn Flashlight On",
-                    shape = QuickButtonShape.CIRCLE,
+                    shape = style.toShape(),
                     isActive = isTorchOn,
                     onClick = actionRunCallback<ToggleFlashlightAction>(),
                 )
@@ -213,12 +348,13 @@ class FlashlightToggleAppWidget : BaseQuickToggleAppWidget() {
     }
 
     override suspend fun providePreview(context: Context, widgetCategory: Int) {
+        val style = QuickToggleStyleRepository.getStyle(context, QuickToggleType.FLASHLIGHT)
         provideContent {
             MaterialYouGlanceTheme {
                 QuickToggleButtonContent(
                     iconRes = R.drawable.ic_toggle_flashlight,
                     contentDescription = "Turn Flashlight On",
-                    shape = QuickButtonShape.CIRCLE,
+                    shape = style.toShape(),
                     isActive = false,
                     onClick = actionRunCallback<ToggleFlashlightAction>(),
                 )
@@ -267,7 +403,7 @@ class ToggleFlashlightAction : ActionCallback {
 }
 
 // ---------------------------------------------------------------------------
-// 4. Auto-Rotate Quick Button Widget (12-Lobe Scalloped Badge Shape)
+// 4. Auto-Rotate Quick Button Widget
 // ---------------------------------------------------------------------------
 
 class RotateToggleAppWidgetReceiver : GlanceAppWidgetReceiver() {
@@ -287,14 +423,16 @@ class RotateToggleAppWidget : BaseQuickToggleAppWidget() {
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         val systemAutoRotate = readSystemAutoRotate(context)
+        val fallbackStyle = QuickToggleStyleRepository.getStyle(context, QuickToggleType.ROTATE)
         provideContent {
             val prefs = currentState<Preferences>()
             val isRotateOn = prefs[KEY_ROTATE_ON] ?: systemAutoRotate
+            val style = prefs[KEY_BUTTON_STYLE]?.let(QuickButtonStyle::fromId) ?: fallbackStyle
             MaterialYouGlanceTheme {
                 QuickToggleButtonContent(
                     iconRes = R.drawable.ic_toggle_rotate,
                     contentDescription = "Toggle Auto-Rotate",
-                    shape = QuickButtonShape.SCALLOP_12,
+                    shape = style.toShape(),
                     isActive = isRotateOn,
                     onClick = actionRunCallback<ToggleAutoRotateAction>(),
                 )
@@ -304,12 +442,13 @@ class RotateToggleAppWidget : BaseQuickToggleAppWidget() {
 
     override suspend fun providePreview(context: Context, widgetCategory: Int) {
         val systemAutoRotate = readSystemAutoRotate(context)
+        val style = QuickToggleStyleRepository.getStyle(context, QuickToggleType.ROTATE)
         provideContent {
             MaterialYouGlanceTheme {
                 QuickToggleButtonContent(
                     iconRes = R.drawable.ic_toggle_rotate,
                     contentDescription = "Toggle Auto-Rotate",
-                    shape = QuickButtonShape.SCALLOP_12,
+                    shape = style.toShape(),
                     isActive = systemAutoRotate,
                     onClick = actionRunCallback<ToggleAutoRotateAction>(),
                 )
@@ -364,7 +503,7 @@ class ToggleAutoRotateAction : ActionCallback {
 }
 
 // ---------------------------------------------------------------------------
-// 5. Bluetooth Quick Button Widget (Scalloped Cookie Shape)
+// 5. Bluetooth Quick Button Widget
 // ---------------------------------------------------------------------------
 
 class BluetoothToggleAppWidgetReceiver : GlanceAppWidgetReceiver() {
@@ -380,14 +519,16 @@ class BluetoothToggleAppWidget : BaseQuickToggleAppWidget() {
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         val systemBtEnabled = readSystemBluetoothEnabled(context)
+        val fallbackStyle = QuickToggleStyleRepository.getStyle(context, QuickToggleType.BLUETOOTH)
         provideContent {
             val prefs = currentState<Preferences>()
             val isBtOn = prefs[KEY_BLUETOOTH_ON] ?: systemBtEnabled
+            val style = prefs[KEY_BUTTON_STYLE]?.let(QuickButtonStyle::fromId) ?: fallbackStyle
             MaterialYouGlanceTheme {
                 QuickToggleButtonContent(
                     iconRes = R.drawable.ic_toggle_bluetooth,
                     contentDescription = "Bluetooth Settings",
-                    shape = QuickButtonShape.SCALLOP_8,
+                    shape = style.toShape(),
                     isActive = isBtOn,
                     onClick = actionRunCallback<ToggleBluetoothAction>(),
                 )
@@ -397,12 +538,13 @@ class BluetoothToggleAppWidget : BaseQuickToggleAppWidget() {
 
     override suspend fun providePreview(context: Context, widgetCategory: Int) {
         val systemBtEnabled = readSystemBluetoothEnabled(context)
+        val style = QuickToggleStyleRepository.getStyle(context, QuickToggleType.BLUETOOTH)
         provideContent {
             MaterialYouGlanceTheme {
                 QuickToggleButtonContent(
                     iconRes = R.drawable.ic_toggle_bluetooth,
                     contentDescription = "Bluetooth Settings",
-                    shape = QuickButtonShape.SCALLOP_8,
+                    shape = style.toShape(),
                     isActive = systemBtEnabled,
                     onClick = actionRunCallback<ToggleBluetoothAction>(),
                 )
@@ -449,7 +591,7 @@ class ToggleBluetoothAction : ActionCallback {
 }
 
 // ---------------------------------------------------------------------------
-// 6. Ringer / Sound Mode Cycle Widget (12-Lobe Scalloped Badge Shape)
+// 6. Ringer / Sound Mode Cycle Widget
 // ---------------------------------------------------------------------------
 
 class RingerToggleAppWidgetReceiver : GlanceAppWidgetReceiver() {
@@ -484,15 +626,17 @@ class RingerToggleAppWidget : BaseQuickToggleAppWidget() {
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         val systemRingerMode = readSystemRingerMode(context)
+        val fallbackStyle = QuickToggleStyleRepository.getStyle(context, QuickToggleType.RINGER)
         provideContent {
             val prefs = currentState<Preferences>()
             val mode = prefs[KEY_RINGER_MODE] ?: systemRingerMode
+            val style = prefs[KEY_BUTTON_STYLE]?.let(QuickButtonStyle::fromId) ?: fallbackStyle
             val (iconRes, desc, isActive) = ringerVisuals(mode)
             MaterialYouGlanceTheme {
                 QuickToggleButtonContent(
                     iconRes = iconRes,
                     contentDescription = desc,
-                    shape = QuickButtonShape.SCALLOP_12,
+                    shape = style.toShape(),
                     isActive = isActive,
                     onClick = actionRunCallback<CycleRingerModeAction>(),
                 )
@@ -502,13 +646,14 @@ class RingerToggleAppWidget : BaseQuickToggleAppWidget() {
 
     override suspend fun providePreview(context: Context, widgetCategory: Int) {
         val systemRingerMode = readSystemRingerMode(context)
+        val style = QuickToggleStyleRepository.getStyle(context, QuickToggleType.RINGER)
         val (iconRes, desc, isActive) = ringerVisuals(systemRingerMode)
         provideContent {
             MaterialYouGlanceTheme {
                 QuickToggleButtonContent(
                     iconRes = iconRes,
                     contentDescription = desc,
-                    shape = QuickButtonShape.SCALLOP_12,
+                    shape = style.toShape(),
                     isActive = isActive,
                     onClick = actionRunCallback<CycleRingerModeAction>(),
                 )

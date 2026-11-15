@@ -1,24 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:paddingVertical="4dp">
+    android:layout_height="match_parent">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="56dp"
+        android:layout_height="52dp"
         android:layout_gravity="center"
         android:background="@drawable/bg_widget_pill"
-        android:backgroundTint="@color/widget_preview_inverse_surface"
+        android:backgroundTint="@color/widget_preview_secondary_container"
         android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:paddingHorizontal="8dp">
+        android:orientation="horizontal">
 
         <FrameLayout
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="42dp"
+            android:layout_height="42dp"
+            android:layout_marginStart="5dp"
             android:background="@drawable/bg_widget_circle"
-            android:backgroundTint="@color/widget_preview_secondary_container">
+            android:backgroundTint="@color/widget_preview_primary_container">
 
             <ImageView
                 android:layout_width="20dp"
@@ -26,7 +25,7 @@
                 android:layout_gravity="center"
                 android:contentDescription="@null"
                 android:src="@drawable/ic_music_note"
-                android:tint="@color/widget_preview_on_secondary_container" />
+                android:tint="@color/widget_preview_on_primary_container" />
         </FrameLayout>
 
         <LinearLayout
@@ -41,7 +40,7 @@
                 android:layout_height="wrap_content"
                 android:singleLine="true"
                 android:text="No Music Playing"
-                android:textColor="@color/widget_preview_inverse_on_surface"
+                android:textColor="@color/widget_preview_on_secondary_container"
                 android:textSize="13sp"
                 android:textStyle="bold" />
 
@@ -50,59 +49,66 @@
                 android:layout_height="wrap_content"
                 android:singleLine="true"
                 android:text="Tap to Play"
-                android:textColor="@color/widget_preview_inverse_primary"
+                android:textColor="@color/widget_preview_primary"
                 android:textSize="11sp" />
         </LinearLayout>
 
-        <FrameLayout
-            android:layout_width="114dp"
-            android:layout_height="42dp">
+        <LinearLayout
+            android:layout_width="132dp"
+            android:layout_height="52dp"
+            android:background="@drawable/bg_widget_pill"
+            android:backgroundTint="@color/widget_preview_tertiary_container"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="34dp"
-                android:layout_gravity="center"
-                android:background="@drawable/bg_widget_pill"
-                android:backgroundTint="@color/widget_preview_tertiary_container"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:paddingHorizontal="8dp">
+            <FrameLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1">
 
                 <ImageView
-                    android:layout_width="16dp"
-                    android:layout_height="16dp"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_gravity="center"
                     android:contentDescription="@null"
                     android:src="@drawable/ic_music_prev"
                     android:tint="@color/widget_preview_on_tertiary_container" />
+            </FrameLayout>
 
-                <FrameLayout
-                    android:layout_width="0dp"
-                    android:layout_height="1dp"
-                    android:layout_weight="1" />
+            <FrameLayout
+                android:layout_width="50dp"
+                android:layout_height="1dp" />
+
+            <FrameLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1">
 
                 <ImageView
-                    android:layout_width="16dp"
-                    android:layout_height="16dp"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_gravity="center"
                     android:contentDescription="@null"
                     android:src="@drawable/ic_music_next"
                     android:tint="@color/widget_preview_on_tertiary_container" />
-            </LinearLayout>
-
-            <FrameLayout
-                android:layout_width="42dp"
-                android:layout_height="42dp"
-                android:layout_gravity="center"
-                android:background="@drawable/bg_scalloped_badge_12"
-                android:backgroundTint="@color/widget_preview_primary_container">
-
-                <ImageView
-                    android:layout_width="18dp"
-                    android:layout_height="18dp"
-                    android:layout_gravity="center"
-                    android:contentDescription="@null"
-                    android:src="@drawable/ic_music_play"
-                    android:tint="@color/widget_preview_on_primary_container" />
             </FrameLayout>
-        </FrameLayout>
+        </LinearLayout>
     </LinearLayout>
+
+    <FrameLayout
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:layout_gravity="center_vertical|end"
+        android:layout_marginEnd="34dp"
+        android:background="@drawable/bg_scalloped_badge_12"
+        android:backgroundTint="@color/widget_preview_primary_container">
+
+        <ImageView
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:layout_gravity="center"
+            android:contentDescription="@null"
+            android:src="@drawable/ic_music_play"
+            android:tint="@color/widget_preview_on_primary_container" />
+    </FrameLayout>
 </FrameLayout>

@@ -42,6 +42,7 @@ import androidx.compose.material.icons.rounded.ScreenRotation
 import androidx.compose.material.icons.rounded.SwapVert
 import androidx.compose.material.icons.rounded.Wifi
 import androidx.compose.material3.AssistChip
+import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -97,6 +98,9 @@ import dev.shiqan.materialwidgets.widget.system.StorageRamAppWidgetReceiver
 import dev.shiqan.materialwidgets.widget.toggles.BluetoothToggleAppWidgetReceiver
 import dev.shiqan.materialwidgets.widget.toggles.DataToggleAppWidgetReceiver
 import dev.shiqan.materialwidgets.widget.toggles.FlashlightToggleAppWidgetReceiver
+import dev.shiqan.materialwidgets.widget.toggles.QuickButtonStyle
+import dev.shiqan.materialwidgets.widget.toggles.QuickToggleStyleRepository
+import dev.shiqan.materialwidgets.widget.toggles.QuickToggleType
 import dev.shiqan.materialwidgets.widget.toggles.RingerToggleAppWidgetReceiver
 import dev.shiqan.materialwidgets.widget.toggles.RotateToggleAppWidgetReceiver
 import dev.shiqan.materialwidgets.widget.toggles.WifiToggleAppWidgetReceiver
@@ -126,6 +130,9 @@ internal fun MainScreen(data: List<String>, modifier: Modifier = Modifier) {
     var isMediaAccessEnabled by remember {
         mutableStateOf(MediaSessionControllerHelper.isNotificationListenerEnabled(context))
     }
+    var quickToggleStyles by remember {
+        mutableStateOf(QuickToggleStyleRepository.getAllStyles(context))
+    }
 
     LaunchedEffect(context) {
         publishAllWidgetPreviews(context)
@@ -135,10 +142,27 @@ internal fun MainScreen(data: List<String>, modifier: Modifier = Modifier) {
         requestPinAppWidget(scope = scope, context = context, receiverClass = receiverClass)
     }
 
+    val setAllQuickStyles: (QuickButtonStyle) -> Unit = { style ->
+        quickToggleStyles = QuickToggleType.entries.associateWith { style }
+        scope.launch {
+            QuickToggleStyleRepository.setAllStyles(context, style)
+        }
+    }
+
+    val toggleQuickStyle: (QuickToggleType) -> Unit = { type ->
+        val current = quickToggleStyles[type] ?: QuickButtonStyle.DEFAULT
+        val next = if (current == QuickButtonStyle.ROUND) QuickButtonStyle.CURVY else QuickButtonStyle.ROUND
+        quickToggleStyles = quickToggleStyles + (type to next)
+        scope.launch {
+            QuickToggleStyleRepository.setStyle(context, type, next)
+        }
+    }
+
     DisposableEffect(lifecycleOwner, context) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
                 isMediaAccessEnabled = MediaSessionControllerHelper.isNotificationListenerEnabled(context)
+                quickToggleStyles = QuickToggleStyleRepository.getAllStyles(context)
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
@@ -191,8 +215,8 @@ internal fun MainScreen(data: List<String>, modifier: Modifier = Modifier) {
                     title = stringResource(R.string.calendar_card_widget_name),
                     subtitle = "3-Day Strip Calendar Card (2x2) • Scalloped Today Badge, Month & Year",
                     icon = Icons.Rounded.CalendarMonth,
-                    containerColor = MaterialTheme.colorScheme.inverseSurface,
-                    contentColor = MaterialTheme.colorScheme.inverseOnSurface,
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
                     onPinClick = { pinWidget(CalendarCardAppWidgetReceiver::class.java) },
                 )
             }
@@ -200,7 +224,7 @@ internal fun MainScreen(data: List<String>, modifier: Modifier = Modifier) {
             item {
                 WidgetGalleryCard(
                     title = stringResource(R.string.circle_clock_widget_name),
-                    subtitle = "Circular Clock & Date (2x2) • Day-of-Week, Time Pill & Date Strip",
+                    subtitle = "Transparent Stacked Clock & Date Pills (2x2) • Day, Time & Date",
                     icon = Icons.Rounded.AccessTime,
                     containerColor = MaterialTheme.colorScheme.secondaryContainer,
                     contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
@@ -237,55 +261,11 @@ internal fun MainScreen(data: List<String>, modifier: Modifier = Modifier) {
             item {
                 WidgetGalleryCard(
                     title = stringResource(R.string.music_pill_widget_name),
-                    subtitle = "Compact 4x1 Stadium Bar • Circular Art, Nested Pill & Scalloped Play Button",
+                    subtitle = "Compact 4x1 Stadium Bar • Full-Height Controls & Oversized Curvy Play Badge",
                     icon = Icons.Rounded.MusicNote,
-                    containerColor = MaterialTheme.colorScheme.inverseSurface,
-                    contentColor = MaterialTheme.colorScheme.inverseOnSurface,
+                    containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
                     onPinClick = { pinWidget(MusicPillAppWidgetReceiver::class.java) },
-                )
-            }
-
-            item {
-                WidgetGalleryCard(
-                    title = stringResource(R.string.wifi_toggle_widget_name),
-                    subtitle = "1x1 Scalloped Cookie Button • Opens Wi-Fi Quick Settings Panel",
-                    icon = Icons.Rounded.Wifi,
-                    containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
-                    onPinClick = { pinWidget(WifiToggleAppWidgetReceiver::class.java) },
-                )
-            }
-
-            item {
-                WidgetGalleryCard(
-                    title = stringResource(R.string.data_toggle_widget_name),
-                    subtitle = "1x1 Circular Button • Opens Mobile Data / Internet Panel",
-                    icon = Icons.Rounded.SwapVert,
-                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                    onPinClick = { pinWidget(DataToggleAppWidgetReceiver::class.java) },
-                )
-            }
-
-            item {
-                WidgetGalleryCard(
-                    title = stringResource(R.string.flashlight_toggle_widget_name),
-                    subtitle = "1x1 Circular Button • Toggles Camera Torch On/Off",
-                    icon = Icons.Rounded.FlashlightOn,
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                    onPinClick = { pinWidget(FlashlightToggleAppWidgetReceiver::class.java) },
-                )
-            }
-
-            item {
-                WidgetGalleryCard(
-                    title = stringResource(R.string.rotate_toggle_widget_name),
-                    subtitle = "1x1 Scalloped Badge Button • Toggles Screen Auto-Rotation",
-                    icon = Icons.Rounded.ScreenRotation,
-                    containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
-                    onPinClick = { pinWidget(RotateToggleAppWidgetReceiver::class.java) },
                 )
             }
 
@@ -312,12 +292,73 @@ internal fun MainScreen(data: List<String>, modifier: Modifier = Modifier) {
             }
 
             item {
+                QuickButtonsStyleConfigCard(
+                    styles = quickToggleStyles,
+                    onSelectAll = setAllQuickStyles,
+                )
+            }
+
+            item {
+                WidgetGalleryCard(
+                    title = stringResource(R.string.wifi_toggle_widget_name),
+                    subtitle = "1x1 Quick Button • Opens Wi-Fi Quick Settings Panel",
+                    icon = Icons.Rounded.Wifi,
+                    containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+                    selectedStyle = quickToggleStyles[QuickToggleType.WIFI] ?: QuickButtonStyle.DEFAULT,
+                    onToggleStyle = { toggleQuickStyle(QuickToggleType.WIFI) },
+                    onPinClick = { pinWidget(WifiToggleAppWidgetReceiver::class.java) },
+                )
+            }
+
+            item {
+                WidgetGalleryCard(
+                    title = stringResource(R.string.data_toggle_widget_name),
+                    subtitle = "1x1 Quick Button • Opens Mobile Data / Internet Settings",
+                    icon = Icons.Rounded.SwapVert,
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                    selectedStyle = quickToggleStyles[QuickToggleType.DATA] ?: QuickButtonStyle.DEFAULT,
+                    onToggleStyle = { toggleQuickStyle(QuickToggleType.DATA) },
+                    onPinClick = { pinWidget(DataToggleAppWidgetReceiver::class.java) },
+                )
+            }
+
+            item {
+                WidgetGalleryCard(
+                    title = stringResource(R.string.flashlight_toggle_widget_name),
+                    subtitle = "1x1 Quick Button • Toggles Camera Torch On/Off",
+                    icon = Icons.Rounded.FlashlightOn,
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    selectedStyle = quickToggleStyles[QuickToggleType.FLASHLIGHT] ?: QuickButtonStyle.DEFAULT,
+                    onToggleStyle = { toggleQuickStyle(QuickToggleType.FLASHLIGHT) },
+                    onPinClick = { pinWidget(FlashlightToggleAppWidgetReceiver::class.java) },
+                )
+            }
+
+            item {
+                WidgetGalleryCard(
+                    title = stringResource(R.string.rotate_toggle_widget_name),
+                    subtitle = "1x1 Quick Button • Toggles Screen Auto-Rotation",
+                    icon = Icons.Rounded.ScreenRotation,
+                    containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+                    selectedStyle = quickToggleStyles[QuickToggleType.ROTATE] ?: QuickButtonStyle.DEFAULT,
+                    onToggleStyle = { toggleQuickStyle(QuickToggleType.ROTATE) },
+                    onPinClick = { pinWidget(RotateToggleAppWidgetReceiver::class.java) },
+                )
+            }
+
+            item {
                 WidgetGalleryCard(
                     title = stringResource(R.string.bluetooth_toggle_widget_name),
-                    subtitle = "1x1 Scalloped Cookie Button • Opens Bluetooth Settings & Pairing",
+                    subtitle = "1x1 Quick Button • Opens Bluetooth Settings & Pairing",
                     icon = Icons.Rounded.Bluetooth,
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    selectedStyle = quickToggleStyles[QuickToggleType.BLUETOOTH] ?: QuickButtonStyle.DEFAULT,
+                    onToggleStyle = { toggleQuickStyle(QuickToggleType.BLUETOOTH) },
                     onPinClick = { pinWidget(BluetoothToggleAppWidgetReceiver::class.java) },
                 )
             }
@@ -325,10 +366,12 @@ internal fun MainScreen(data: List<String>, modifier: Modifier = Modifier) {
             item {
                 WidgetGalleryCard(
                     title = stringResource(R.string.ringer_toggle_widget_name),
-                    subtitle = "1x1 12-Lobe Scalloped Badge • Cycles Sound, Vibrate & Silent Modes",
+                    subtitle = "1x1 Quick Button • Cycles Sound, Vibrate & Silent Modes",
                     icon = Icons.Rounded.NotificationsActive,
                     containerColor = MaterialTheme.colorScheme.tertiaryContainer,
                     contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+                    selectedStyle = quickToggleStyles[QuickToggleType.RINGER] ?: QuickButtonStyle.DEFAULT,
+                    onToggleStyle = { toggleQuickStyle(QuickToggleType.RINGER) },
                     onPinClick = { pinWidget(RingerToggleAppWidgetReceiver::class.java) },
                 )
             }
@@ -701,12 +744,77 @@ private fun ColorSwatchPill(label: String, color: Color) {
 }
 
 @Composable
+private fun QuickButtonsStyleConfigCard(
+    styles: Map<QuickToggleType, QuickButtonStyle>,
+    onSelectAll: (QuickButtonStyle) -> Unit,
+) {
+    val allRound = styles.values.all { it == QuickButtonStyle.ROUND }
+    val allCurvy = styles.values.all { it == QuickButtonStyle.CURVY }
+
+    Card(
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainer,
+        ),
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(18.dp),
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.Palette,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(24.dp),
+                )
+                Spacer(modifier = Modifier.width(12.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "Quick Buttons Style",
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                    )
+                    Text(
+                        text = "Switch all 1x1 quick buttons or customize each button below",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                FilterChip(
+                    selected = allRound,
+                    onClick = { onSelectAll(QuickButtonStyle.ROUND) },
+                    label = { Text(QuickButtonStyle.ROUND.label, fontWeight = FontWeight.Bold) },
+                )
+                FilterChip(
+                    selected = allCurvy,
+                    onClick = { onSelectAll(QuickButtonStyle.CURVY) },
+                    label = { Text(QuickButtonStyle.CURVY.label, fontWeight = FontWeight.Bold) },
+                )
+            }
+        }
+    }
+}
+
+@Composable
 private fun WidgetGalleryCard(
     title: String,
     subtitle: String,
     icon: ImageVector,
     containerColor: Color,
     contentColor: Color,
+    selectedStyle: QuickButtonStyle? = null,
+    onToggleStyle: (() -> Unit)? = null,
     onPinClick: () -> Unit,
 ) {
     Card(
@@ -752,6 +860,26 @@ private fun WidgetGalleryCard(
                     style = MaterialTheme.typography.bodySmall,
                     color = contentColor.copy(alpha = 0.85f),
                 )
+                if (selectedStyle != null && onToggleStyle != null) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    AssistChip(
+                        onClick = onToggleStyle,
+                        colors = AssistChipDefaults.assistChipColors(
+                            labelColor = contentColor,
+                        ),
+                        border = AssistChipDefaults.assistChipBorder(
+                            enabled = true,
+                            borderColor = contentColor.copy(alpha = 0.4f),
+                        ),
+                        label = {
+                            Text(
+                                text = "Style: ${selectedStyle.label}",
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.SemiBold,
+                            )
+                        },
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.width(12.dp))

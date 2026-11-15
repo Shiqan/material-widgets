@@ -7,7 +7,7 @@
         android:layout_width="64dp"
         android:layout_height="64dp"
         android:layout_gravity="center"
-        android:background="@drawable/bg_scalloped_badge_12"
+        android:background="@drawable/bg_widget_circle"
         android:backgroundTint="@color/widget_preview_tertiary_container">
 
         <ImageView

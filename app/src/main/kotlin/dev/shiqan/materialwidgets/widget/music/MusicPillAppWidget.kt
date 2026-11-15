@@ -33,7 +33,9 @@ import androidx.glance.layout.Column
 import androidx.glance.layout.ContentScale
 import androidx.glance.layout.Row
 import androidx.glance.layout.Spacer
+import androidx.glance.layout.fillMaxHeight
 import androidx.glance.layout.fillMaxSize
+import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.height
 import androidx.glance.layout.padding
 import androidx.glance.layout.size
@@ -58,11 +60,11 @@ class MusicPillAppWidgetReceiver : GlanceAppWidgetReceiver() {
 
 /**
  * 4x1 Stadium Pill Music Widget inspired by Material You Widgets Pro:
- * - Full-rounded dark/inverse surface capsule bar
+ * - Full-rounded Material You (`secondaryContainer`) capsule bar
  * - Circular album art avatar on the left
  * - Track title / "No Music Playing" & Artist / "Tap to Play" in the middle
- * - Nested tertiary pill on the right with Previous / Next and an overlapping
- *   12-lobe scalloped primary play/pause badge in the center.
+ * - Full-height nested tertiary transport pill on the right with Previous / Next
+ *   and an oversized 12-lobe scalloped primary play/pause badge extending beyond the pill.
  */
 class MusicPillAppWidget : GlanceAppWidget() {
     override val stateDefinition: GlanceStateDefinition<*> = PreferencesGlanceStateDefinition
@@ -188,27 +190,31 @@ fun MusicPillWidgetContent(
     isPlaying: Boolean = false,
 ) {
     val size = LocalSize.current
-    val pillHeight = size.height.coerceIn(52.dp, 84.dp)
+    val playBadgeSize = size.height.coerceIn(52.dp, 88.dp)
+    val pillHeight = (playBadgeSize - 12.dp).coerceIn(40.dp, 74.dp)
     val pillRadius = pillHeight / 2
-    val avatarSize = (pillHeight - 12.dp).coerceIn(40.dp, 64.dp)
-    val playBadgeSize = (pillHeight - 12.dp).coerceIn(42.dp, 60.dp)
-    val innerPillHeight = (playBadgeSize - 8.dp).coerceAtLeast(34.dp)
+    val avatarSize = (pillHeight - 10.dp).coerceIn(30.dp, 60.dp)
+    val transportWidth = (playBadgeSize + 68.dp).coerceIn(120.dp, 156.dp)
+    val centerGapWidth = (playBadgeSize - 14.dp).coerceAtLeast(36.dp)
+    val playBadgeEndOffset = (transportWidth - playBadgeSize) / 2
     val playPauseIcon = if (isPlaying) R.drawable.ic_music_pause else R.drawable.ic_music_play
 
     Box(
         contentAlignment = Alignment.Center,
         modifier = GlanceModifier.fillMaxSize(),
     ) {
+        // Layer 1: Main Music Pill Bar (shorter than playBadgeSize so the curvy Play button protrudes)
         Row(
             modifier = GlanceModifier
-                .fillMaxSize()
+                .fillMaxWidth()
                 .height(pillHeight)
                 .appWidgetBackground()
-                .background(GlanceTheme.colors.inverseSurface)
-                .cornerRadius(pillRadius)
-                .padding(horizontal = 6.dp, vertical = 6.dp),
+                .background(GlanceTheme.colors.secondaryContainer)
+                .cornerRadius(pillRadius),
             verticalAlignment = Alignment.CenterVertically,
         ) {
+            Spacer(modifier = GlanceModifier.width(5.dp))
+
             // Left Circular Album Art Avatar
             if (albumArtBitmap != null) {
                 Box(
@@ -240,12 +246,12 @@ fun MusicPillWidgetContent(
                         provider = ImageProvider(R.drawable.ic_music_note),
                         contentDescription = title,
                         colorFilter = ColorFilter.tint(GlanceTheme.colors.onPrimaryContainer),
-                        modifier = GlanceModifier.size(22.dp),
+                        modifier = GlanceModifier.size(20.dp),
                     )
                 }
             }
 
-            Spacer(modifier = GlanceModifier.width(12.dp))
+            Spacer(modifier = GlanceModifier.width(10.dp))
 
             // Middle Track Title + Subtitle ("No Music Playing" / "Tap to Play")
             Column(
@@ -257,7 +263,7 @@ fun MusicPillWidgetContent(
                 Text(
                     text = title,
                     style = TextStyle(
-                        color = GlanceTheme.colors.inverseOnSurface,
+                        color = GlanceTheme.colors.onSecondaryContainer,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
                     ),
@@ -266,7 +272,7 @@ fun MusicPillWidgetContent(
                 Text(
                     text = subtitle,
                     style = TextStyle(
-                        color = GlanceTheme.colors.inversePrimary,
+                        color = GlanceTheme.colors.primary,
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Normal,
                     ),
@@ -276,74 +282,74 @@ fun MusicPillWidgetContent(
 
             Spacer(modifier = GlanceModifier.width(8.dp))
 
-            // Right Nested Transport Pill with Overlapping Scalloped Play/Pause Badge
-            Box(
-                contentAlignment = Alignment.Center,
+            // Right Full-Height Transport Capsule holding Previous (left) and Next (right)
+            Row(
                 modifier = GlanceModifier
-                    .width(114.dp)
-                    .height(playBadgeSize),
+                    .width(transportWidth)
+                    .height(pillHeight)
+                    .background(GlanceTheme.colors.tertiaryContainer)
+                    .cornerRadius(pillRadius),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                // Background capsule holding Prev (left) and Next (right)
-                Row(
-                    modifier = GlanceModifier
-                        .width(114.dp)
-                        .height(innerPillHeight)
-                        .background(GlanceTheme.colors.tertiaryContainer)
-                        .cornerRadius(innerPillHeight / 2)
-                        .padding(horizontal = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Box(
-                        contentAlignment = Alignment.CenterStart,
-                        modifier = GlanceModifier
-                            .defaultWeight()
-                            .height(innerPillHeight)
-                            .clickable(actionRunCallback<PreviousTrackMusicAction>()),
-                    ) {
-                        Image(
-                            provider = ImageProvider(R.drawable.ic_music_prev),
-                            contentDescription = "Previous track",
-                            colorFilter = ColorFilter.tint(GlanceTheme.colors.onTertiaryContainer),
-                            modifier = GlanceModifier.size(18.dp),
-                        )
-                    }
-
-                    Spacer(modifier = GlanceModifier.width(playBadgeSize - 8.dp))
-
-                    Box(
-                        contentAlignment = Alignment.CenterEnd,
-                        modifier = GlanceModifier
-                            .defaultWeight()
-                            .height(innerPillHeight)
-                            .clickable(actionRunCallback<NextTrackMusicAction>()),
-                    ) {
-                        Image(
-                            provider = ImageProvider(R.drawable.ic_music_next),
-                            contentDescription = "Next track",
-                            colorFilter = ColorFilter.tint(GlanceTheme.colors.onTertiaryContainer),
-                            modifier = GlanceModifier.size(18.dp),
-                        )
-                    }
-                }
-
-                // Overlapping 12-Lobe Scalloped Center Play/Pause Button
                 Box(
                     contentAlignment = Alignment.Center,
                     modifier = GlanceModifier
-                        .size(playBadgeSize)
-                        .background(
-                            imageProvider = ImageProvider(R.drawable.bg_scalloped_badge_12),
-                            colorFilter = ColorFilter.tint(GlanceTheme.colors.primaryContainer),
-                        )
-                        .clickable(actionRunCallback<PlayPauseMusicAction>()),
+                        .defaultWeight()
+                        .fillMaxHeight()
+                        .clickable(actionRunCallback<PreviousTrackMusicAction>()),
                 ) {
                     Image(
-                        provider = ImageProvider(playPauseIcon),
-                        contentDescription = if (isPlaying) "Pause" else "Play",
-                        colorFilter = ColorFilter.tint(GlanceTheme.colors.onPrimaryContainer),
+                        provider = ImageProvider(R.drawable.ic_music_prev),
+                        contentDescription = "Previous track",
+                        colorFilter = ColorFilter.tint(GlanceTheme.colors.onTertiaryContainer),
                         modifier = GlanceModifier.size(20.dp),
                     )
                 }
+
+                Spacer(modifier = GlanceModifier.width(centerGapWidth))
+
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = GlanceModifier
+                        .defaultWeight()
+                        .fillMaxHeight()
+                        .clickable(actionRunCallback<NextTrackMusicAction>()),
+                ) {
+                    Image(
+                        provider = ImageProvider(R.drawable.ic_music_next),
+                        contentDescription = "Next track",
+                        colorFilter = ColorFilter.tint(GlanceTheme.colors.onTertiaryContainer),
+                        modifier = GlanceModifier.size(20.dp),
+                    )
+                }
+            }
+        }
+
+        // Layer 2: Oversized 12-Lobe Curvy Scalloped Play/Pause Button protruding above & below the pill
+        Row(
+            modifier = GlanceModifier
+                .fillMaxWidth()
+                .height(playBadgeSize)
+                .padding(end = playBadgeEndOffset),
+            horizontalAlignment = Alignment.End,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = GlanceModifier
+                    .size(playBadgeSize)
+                    .background(
+                        imageProvider = ImageProvider(R.drawable.bg_scalloped_badge_12),
+                        colorFilter = ColorFilter.tint(GlanceTheme.colors.primaryContainer),
+                    )
+                    .clickable(actionRunCallback<PlayPauseMusicAction>()),
+            ) {
+                Image(
+                    provider = ImageProvider(playPauseIcon),
+                    contentDescription = if (isPlaying) "Pause" else "Play",
+                    colorFilter = ColorFilter.tint(GlanceTheme.colors.onPrimaryContainer),
+                    modifier = GlanceModifier.size(22.dp),
+                )
             }
         }
     }

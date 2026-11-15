@@ -57,8 +57,8 @@ class CircleClockAppWidgetReceiver : GlanceAppWidgetReceiver() {
 }
 
 /**
- * Circular Clock & Date Widget matching the reference showcase:
- * - Outer circular frame (`inverseSurface`)
+ * Transparent Circular Clock & Date Widget:
+ * - Transparent outer container so the stacked Material You pills float over the wallpaper
  * - Top pill: Day of week ("Thursday")
  * - Center bold pill: Current Time ("02 30")
  * - Bottom pill: Day + Month ("31 January")
@@ -123,8 +123,6 @@ fun CircleClockWidgetContent(
             modifier = GlanceModifier
                 .size(diameter)
                 .appWidgetBackground()
-                .background(GlanceTheme.colors.inverseSurface)
-                .cornerRadius(diameter / 2)
                 .padding(14.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalAlignment = Alignment.CenterVertically,

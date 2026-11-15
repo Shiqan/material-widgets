@@ -8,8 +8,6 @@
         android:layout_width="148dp"
         android:layout_height="148dp"
         android:layout_gravity="center"
-        android:background="@drawable/bg_widget_circle"
-        android:backgroundTint="@color/widget_preview_inverse_surface"
         android:gravity="center"
         android:orientation="vertical"
         android:padding="14dp">
