@@ -4,6 +4,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
 
     <queries>
         <intent>
@@ -203,6 +204,126 @@
             <meta-data
                 android:name="android.appwidget.provider"
                 android:resource="@xml/ringer_toggle_widget_info" />
+        </receiver>
+
+        <receiver
+            android:name=".widget.toggles.MuteToggleAppWidgetReceiver"
+            android:exported="true"
+            android:label="@string/mute_toggle_widget_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/mute_toggle_widget_info" />
+        </receiver>
+
+        <receiver
+            android:name=".widget.toggles.VibrateToggleAppWidgetReceiver"
+            android:exported="true"
+            android:label="@string/vibrate_toggle_widget_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/vibrate_toggle_widget_info" />
+        </receiver>
+
+        <receiver
+            android:name=".widget.toggles.RingToggleAppWidgetReceiver"
+            android:exported="true"
+            android:label="@string/ring_toggle_widget_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/ring_toggle_widget_info" />
+        </receiver>
+
+        <receiver
+            android:name=".widget.weather.WeatherPillAppWidgetReceiver"
+            android:exported="true"
+            android:label="@string/weather_pill_widget_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/weather_pill_widget_info" />
+        </receiver>
+
+        <receiver
+            android:name=".widget.clock.ClockBatteryPillAppWidgetReceiver"
+            android:exported="true"
+            android:label="@string/clock_battery_pill_widget_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/clock_battery_pill_widget_info" />
+        </receiver>
+
+        <receiver
+            android:name=".widget.clock.AnalogClockAppWidgetReceiver"
+            android:exported="true"
+            android:label="@string/analog_clock_widget_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/analog_clock_widget_info" />
+        </receiver>
+
+        <receiver
+            android:name=".widget.calendar.DateClockPillAppWidgetReceiver"
+            android:exported="true"
+            android:label="@string/date_clock_pill_widget_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/date_clock_pill_widget_info" />
+        </receiver>
+
+        <receiver
+            android:name=".widget.calendar.DatePillAppWidgetReceiver"
+            android:exported="true"
+            android:label="@string/date_pill_widget_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/date_pill_widget_info" />
+        </receiver>
+
+        <receiver
+            android:name=".widget.system.StoragePillAppWidgetReceiver"
+            android:exported="true"
+            android:label="@string/storage_pill_widget_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/storage_pill_widget_info" />
+        </receiver>
+
+        <receiver
+            android:name=".widget.system.RamPillAppWidgetReceiver"
+            android:exported="true"
+            android:label="@string/ram_pill_widget_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/ram_pill_widget_info" />
         </receiver>
 
         <service

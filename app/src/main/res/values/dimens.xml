@@ -55,7 +55,7 @@
     <dimen name="calendar_widget_max_resize_width">320dp</dimen>
     <dimen name="calendar_widget_max_resize_height">320dp</dimen>
 
-    <!-- Quick Toggle 1x1 Single Button widgets (Wi-Fi, Data, Flashlight, Rotate) -->
+    <!-- Quick Toggle 1x1 Single Button widgets (Wi-Fi, Data, Flashlight, Rotate, Mute, Vibrate, Ring) -->
     <integer name="quick_toggle_single_target_cell_width">1</integer>
     <integer name="quick_toggle_single_target_cell_height">1</integer>
     <dimen name="quick_toggle_single_min_width">56dp</dimen>
@@ -64,4 +64,24 @@
     <dimen name="quick_toggle_single_min_resize_height">48dp</dimen>
     <dimen name="quick_toggle_single_max_resize_width">180dp</dimen>
     <dimen name="quick_toggle_single_max_resize_height">180dp</dimen>
+
+    <!-- 2x1 Pill widgets (Date Pill, Storage Pill, RAM Pill) -->
+    <integer name="pill_2x1_target_cell_width">2</integer>
+    <integer name="pill_2x1_target_cell_height">1</integer>
+    <dimen name="pill_2x1_min_width">120dp</dimen>
+    <dimen name="pill_2x1_min_height">56dp</dimen>
+    <dimen name="pill_2x1_min_resize_width">110dp</dimen>
+    <dimen name="pill_2x1_min_resize_height">52dp</dimen>
+    <dimen name="pill_2x1_max_resize_width">360dp</dimen>
+    <dimen name="pill_2x1_max_resize_height">140dp</dimen>
+
+    <!-- 3x2 / 4x2 Stadium Pill widgets (Weather Pill, Clock & Battery Pill) -->
+    <integer name="clock_battery_pill_target_cell_width">3</integer>
+    <integer name="clock_battery_pill_target_cell_height">2</integer>
+    <dimen name="clock_battery_pill_min_width">190dp</dimen>
+    <dimen name="clock_battery_pill_min_height">115dp</dimen>
+    <dimen name="clock_battery_pill_min_resize_width">160dp</dimen>
+    <dimen name="clock_battery_pill_min_resize_height">100dp</dimen>
+    <dimen name="clock_battery_pill_max_resize_width">624dp</dimen>
+    <dimen name="clock_battery_pill_max_resize_height">280dp</dimen>
 </resources>

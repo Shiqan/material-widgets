@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextClock xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_text_clock_date"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:format12Hour="EEE, MMM d"
+    android:format24Hour="EEE, MMM d"
+    android:gravity="center"
+    android:includeFontPadding="false"
+    android:singleLine="true"
+    android:textColor="@color/widget_preview_primary"
+    android:textSize="14sp"
+    android:textStyle="bold" />

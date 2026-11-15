@@ -14,14 +14,26 @@ import dev.shiqan.materialwidgets.widget.calendar.CalendarCardAppWidget
 import dev.shiqan.materialwidgets.widget.calendar.CalendarCardAppWidgetReceiver
 import dev.shiqan.materialwidgets.widget.calendar.CircleClockAppWidget
 import dev.shiqan.materialwidgets.widget.calendar.CircleClockAppWidgetReceiver
+import dev.shiqan.materialwidgets.widget.calendar.DateClockPillAppWidget
+import dev.shiqan.materialwidgets.widget.calendar.DateClockPillAppWidgetReceiver
+import dev.shiqan.materialwidgets.widget.calendar.DatePillAppWidget
+import dev.shiqan.materialwidgets.widget.calendar.DatePillAppWidgetReceiver
+import dev.shiqan.materialwidgets.widget.clock.AnalogClockAppWidget
+import dev.shiqan.materialwidgets.widget.clock.AnalogClockAppWidgetReceiver
 import dev.shiqan.materialwidgets.widget.clock.ClockAppWidget
 import dev.shiqan.materialwidgets.widget.clock.ClockAppWidgetReceiver
+import dev.shiqan.materialwidgets.widget.clock.ClockBatteryPillAppWidget
+import dev.shiqan.materialwidgets.widget.clock.ClockBatteryPillAppWidgetReceiver
 import dev.shiqan.materialwidgets.widget.music.MusicAppWidget
 import dev.shiqan.materialwidgets.widget.music.MusicAppWidgetReceiver
 import dev.shiqan.materialwidgets.widget.music.MusicPillAppWidget
 import dev.shiqan.materialwidgets.widget.music.MusicPillAppWidgetReceiver
 import dev.shiqan.materialwidgets.widget.system.BatteryAppWidget
 import dev.shiqan.materialwidgets.widget.system.BatteryAppWidgetReceiver
+import dev.shiqan.materialwidgets.widget.system.RamPillAppWidget
+import dev.shiqan.materialwidgets.widget.system.RamPillAppWidgetReceiver
+import dev.shiqan.materialwidgets.widget.system.StoragePillAppWidget
+import dev.shiqan.materialwidgets.widget.system.StoragePillAppWidgetReceiver
 import dev.shiqan.materialwidgets.widget.system.StorageRamAppWidget
 import dev.shiqan.materialwidgets.widget.system.StorageRamAppWidgetReceiver
 import dev.shiqan.materialwidgets.widget.toggles.BluetoothToggleAppWidget
@@ -30,14 +42,22 @@ import dev.shiqan.materialwidgets.widget.toggles.DataToggleAppWidget
 import dev.shiqan.materialwidgets.widget.toggles.DataToggleAppWidgetReceiver
 import dev.shiqan.materialwidgets.widget.toggles.FlashlightToggleAppWidget
 import dev.shiqan.materialwidgets.widget.toggles.FlashlightToggleAppWidgetReceiver
+import dev.shiqan.materialwidgets.widget.toggles.MuteToggleAppWidget
+import dev.shiqan.materialwidgets.widget.toggles.MuteToggleAppWidgetReceiver
+import dev.shiqan.materialwidgets.widget.toggles.RingToggleAppWidget
+import dev.shiqan.materialwidgets.widget.toggles.RingToggleAppWidgetReceiver
 import dev.shiqan.materialwidgets.widget.toggles.RingerToggleAppWidget
 import dev.shiqan.materialwidgets.widget.toggles.RingerToggleAppWidgetReceiver
 import dev.shiqan.materialwidgets.widget.toggles.RotateToggleAppWidget
 import dev.shiqan.materialwidgets.widget.toggles.RotateToggleAppWidgetReceiver
+import dev.shiqan.materialwidgets.widget.toggles.VibrateToggleAppWidget
+import dev.shiqan.materialwidgets.widget.toggles.VibrateToggleAppWidgetReceiver
 import dev.shiqan.materialwidgets.widget.toggles.WifiToggleAppWidget
 import dev.shiqan.materialwidgets.widget.toggles.WifiToggleAppWidgetReceiver
 import dev.shiqan.materialwidgets.widget.weather.WeatherAppWidget
 import dev.shiqan.materialwidgets.widget.weather.WeatherAppWidgetReceiver
+import dev.shiqan.materialwidgets.widget.weather.WeatherPillAppWidget
+import dev.shiqan.materialwidgets.widget.weather.WeatherPillAppWidgetReceiver
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlin.reflect.KClass
@@ -51,19 +71,29 @@ data class WidgetPreviewSpec(
 object WidgetPreviewRegistry {
     val specs: List<WidgetPreviewSpec> = listOf(
         WidgetPreviewSpec(ClockAppWidgetReceiver::class.java, DpSize(160.dp, 160.dp)) { ClockAppWidget() },
+        WidgetPreviewSpec(ClockBatteryPillAppWidgetReceiver::class.java, DpSize(240.dp, 140.dp)) { ClockBatteryPillAppWidget() },
+        WidgetPreviewSpec(AnalogClockAppWidgetReceiver::class.java, DpSize(160.dp, 160.dp)) { AnalogClockAppWidget() },
         WidgetPreviewSpec(CalendarCardAppWidgetReceiver::class.java, DpSize(160.dp, 160.dp)) { CalendarCardAppWidget() },
+        WidgetPreviewSpec(DateClockPillAppWidgetReceiver::class.java, DpSize(320.dp, 76.dp)) { DateClockPillAppWidget() },
+        WidgetPreviewSpec(DatePillAppWidgetReceiver::class.java, DpSize(190.dp, 76.dp)) { DatePillAppWidget() },
         WidgetPreviewSpec(CircleClockAppWidgetReceiver::class.java, DpSize(160.dp, 160.dp)) { CircleClockAppWidget() },
         WidgetPreviewSpec(WeatherAppWidgetReceiver::class.java, DpSize(160.dp, 160.dp)) { WeatherAppWidget() },
+        WidgetPreviewSpec(WeatherPillAppWidgetReceiver::class.java, DpSize(280.dp, 130.dp)) { WeatherPillAppWidget() },
         WidgetPreviewSpec(MusicAppWidgetReceiver::class.java, DpSize(280.dp, 140.dp)) { MusicAppWidget() },
         WidgetPreviewSpec(MusicPillAppWidgetReceiver::class.java, DpSize(320.dp, 64.dp)) { MusicPillAppWidget() },
         WidgetPreviewSpec(BatteryAppWidgetReceiver::class.java, DpSize(160.dp, 160.dp)) { BatteryAppWidget() },
         WidgetPreviewSpec(StorageRamAppWidgetReceiver::class.java, DpSize(160.dp, 160.dp)) { StorageRamAppWidget() },
+        WidgetPreviewSpec(StoragePillAppWidgetReceiver::class.java, DpSize(190.dp, 76.dp)) { StoragePillAppWidget() },
+        WidgetPreviewSpec(RamPillAppWidgetReceiver::class.java, DpSize(190.dp, 76.dp)) { RamPillAppWidget() },
         WidgetPreviewSpec(WifiToggleAppWidgetReceiver::class.java, DpSize(76.dp, 76.dp)) { WifiToggleAppWidget() },
         WidgetPreviewSpec(DataToggleAppWidgetReceiver::class.java, DpSize(76.dp, 76.dp)) { DataToggleAppWidget() },
         WidgetPreviewSpec(FlashlightToggleAppWidgetReceiver::class.java, DpSize(76.dp, 76.dp)) { FlashlightToggleAppWidget() },
         WidgetPreviewSpec(RotateToggleAppWidgetReceiver::class.java, DpSize(76.dp, 76.dp)) { RotateToggleAppWidget() },
         WidgetPreviewSpec(BluetoothToggleAppWidgetReceiver::class.java, DpSize(76.dp, 76.dp)) { BluetoothToggleAppWidget() },
         WidgetPreviewSpec(RingerToggleAppWidgetReceiver::class.java, DpSize(76.dp, 76.dp)) { RingerToggleAppWidget() },
+        WidgetPreviewSpec(MuteToggleAppWidgetReceiver::class.java, DpSize(76.dp, 76.dp)) { MuteToggleAppWidget() },
+        WidgetPreviewSpec(VibrateToggleAppWidgetReceiver::class.java, DpSize(76.dp, 76.dp)) { VibrateToggleAppWidget() },
+        WidgetPreviewSpec(RingToggleAppWidgetReceiver::class.java, DpSize(76.dp, 76.dp)) { RingToggleAppWidget() },
     )
 
     private val specsByReceiver: Map<Class<out GlanceAppWidgetReceiver>, WidgetPreviewSpec> =

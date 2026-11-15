@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:description="@string/date_pill_widget_description"
+    android:initialLayout="@layout/widget_preview_date_pill"
+    android:previewLayout="@layout/widget_preview_date_pill"
+    android:maxResizeHeight="@dimen/pill_2x1_max_resize_height"
+    android:maxResizeWidth="@dimen/pill_2x1_max_resize_width"
+    android:minHeight="@dimen/pill_2x1_min_height"
+    android:minResizeHeight="@dimen/pill_2x1_min_resize_height"
+    android:minResizeWidth="@dimen/pill_2x1_min_resize_width"
+    android:minWidth="@dimen/pill_2x1_min_width"
+    android:resizeMode="horizontal|vertical"
+    android:targetCellHeight="@integer/pill_2x1_target_cell_height"
+    android:targetCellWidth="@integer/pill_2x1_target_cell_width"
+    android:updatePeriodMillis="1800000"
+    android:widgetCategory="home_screen|keyguard" />

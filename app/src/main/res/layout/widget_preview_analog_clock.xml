@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="4dp">
+
+    <FrameLayout
+        android:layout_width="148dp"
+        android:layout_height="148dp"
+        android:layout_gravity="center"
+        android:background="@drawable/bg_scalloped_badge_12"
+        android:backgroundTint="@color/widget_preview_secondary_container">
+
+        <TextClock
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|center_horizontal"
+            android:layout_marginTop="16dp"
+            android:format12Hour="EEE d"
+            android:format24Hour="EEE d"
+            android:textColor="@color/widget_preview_on_secondary_container"
+            android:textSize="13sp"
+            android:textStyle="bold" />
+
+        <AnalogClock
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:dial="@drawable/ic_analog_dial_transparent"
+            android:hand_hour="@drawable/ic_analog_hand_hour"
+            android:hand_minute="@drawable/ic_analog_hand_minute" />
+
+        <FrameLayout
+            android:layout_width="8dp"
+            android:layout_height="8dp"
+            android:layout_gravity="bottom|center_horizontal"
+            android:layout_marginBottom="16dp"
+            android:background="@drawable/bg_widget_circle"
+            android:backgroundTint="@color/widget_preview_tertiary_container" />
+    </FrameLayout>
+</FrameLayout>

@@ -25,9 +25,9 @@ class QuickToggleStyleTest {
     }
 
     @Test
-    fun allSixQuickToggleTypesHaveUniquePreferenceKeys() {
+    fun allQuickToggleTypesHaveUniquePreferenceKeys() {
         val keys = QuickToggleType.entries.map { it.prefKey }
-        assertEquals(6, keys.size)
+        assertEquals(9, keys.size)
         assertEquals(keys.size, keys.toSet().size)
     }
 }

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <AnalogClock
+        android:id="@+id/widget_analog_clock"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:dial="@drawable/ic_analog_dial_transparent"
+        android:hand_hour="@drawable/ic_analog_hand_hour"
+        android:hand_minute="@drawable/ic_analog_hand_minute" />
+</FrameLayout>

@@ -28,4 +28,24 @@
     <string name="bluetooth_toggle_widget_description">Material You Bluetooth quick button widget (Round &amp; Curvy styles)</string>
     <string name="ringer_toggle_widget_name">Quick Button: Ringer Mode</string>
     <string name="ringer_toggle_widget_description">Material You Sound / Vibrate / Silent cycle button (Round &amp; Curvy styles)</string>
+    <string name="mute_toggle_widget_name">Quick Button: Mute</string>
+    <string name="mute_toggle_widget_description">1x1 Material You quick button to switch to Silent / Mute mode</string>
+    <string name="vibrate_toggle_widget_name">Quick Button: Vibrate</string>
+    <string name="vibrate_toggle_widget_description">1x1 Material You quick button to switch to Vibrate mode</string>
+    <string name="ring_toggle_widget_name">Quick Button: Ring</string>
+    <string name="ring_toggle_widget_description">1x1 Material You quick button to switch to Sound / Ring mode</string>
+    <string name="weather_pill_widget_name">Material You Weather Pill</string>
+    <string name="weather_pill_widget_description">Stadium pill weather widget with scalloped sun badge, date, current temp, and H/L range</string>
+    <string name="clock_battery_pill_widget_name">Material You Clock &amp; Battery Pill</string>
+    <string name="clock_battery_pill_widget_description">Stadium pill digital clock with date header and live battery percentage</string>
+    <string name="date_clock_pill_widget_name">Material You Date &amp; Clock Pill</string>
+    <string name="date_clock_pill_widget_description">4x1 stadium pill with full date, month/year, and dual scalloped hour &amp; minute badges</string>
+    <string name="date_pill_widget_name">Material You Date Pill</string>
+    <string name="date_pill_widget_description">Compact stadium date pill with scalloped day badge, month, and day of week</string>
+    <string name="analog_clock_widget_name">Material You Analog Clock</string>
+    <string name="analog_clock_widget_description">12-lobe scalloped analog clock with curved date header and rounded Material You hands</string>
+    <string name="storage_pill_widget_name">Material You Storage Pill</string>
+    <string name="storage_pill_widget_description">2x1 rounded storage gauge with flush-right capacity pill</string>
+    <string name="ram_pill_widget_name">Material You RAM Pill</string>
+    <string name="ram_pill_widget_description">2x1 rounded memory gauge with flush-left RAM usage pill</string>
 </resources>

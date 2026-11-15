@@ -1,5 +1,6 @@
 package dev.shiqan.materialwidgets.widget.toggles
 
+import android.app.NotificationManager
 import android.bluetooth.BluetoothManager
 import android.content.Context
 import android.content.Intent
@@ -25,6 +26,7 @@ import androidx.glance.ImageProvider
 import androidx.glance.LocalSize
 import androidx.glance.action.Action
 import androidx.glance.action.ActionParameters
+import androidx.glance.action.actionParametersOf
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetManager
@@ -84,6 +86,9 @@ enum class QuickToggleType(val prefKey: String) {
     ROTATE("style_rotate"),
     BLUETOOTH("style_bluetooth"),
     RINGER("style_ringer"),
+    MUTE("style_mute"),
+    VIBRATE("style_vibrate"),
+    RING("style_ring"),
 }
 
 /**
@@ -168,6 +173,21 @@ object QuickToggleStyleRepository {
                 RingerToggleAppWidget::class.java,
                 RingerToggleAppWidgetReceiver::class,
                 ::RingerToggleAppWidget,
+            )
+            QuickToggleType.MUTE -> Triple(
+                MuteToggleAppWidget::class.java,
+                MuteToggleAppWidgetReceiver::class,
+                ::MuteToggleAppWidget,
+            )
+            QuickToggleType.VIBRATE -> Triple(
+                VibrateToggleAppWidget::class.java,
+                VibrateToggleAppWidgetReceiver::class,
+                ::VibrateToggleAppWidget,
+            )
+            QuickToggleType.RING -> Triple(
+                RingToggleAppWidget::class.java,
+                RingToggleAppWidgetReceiver::class,
+                ::RingToggleAppWidget,
             )
         }
 }
@@ -690,28 +710,206 @@ class CycleRingerModeAction : ActionCallback {
             prefs[RingerToggleAppWidget.KEY_RINGER_MODE] = nextMode
         }
 
-        try {
-            if (nextMode == AudioManager.RINGER_MODE_SILENT) {
-                // Switching to Silent may require DND policy access; fall back to Vibrate/Normal if restricted
-                audioManager?.ringerMode = AudioManager.RINGER_MODE_SILENT
-            } else {
-                audioManager?.ringerMode = nextMode
-            }
-        } catch (_: SecurityException) {
-            // If Do Not Disturb access is not granted for Silent mode, cycle between Normal and Vibrate
-            val fallbackMode = if (currentSystemMode == AudioManager.RINGER_MODE_NORMAL) {
+        val effectiveMode = applySystemRingerMode(
+            context = context,
+            targetMode = nextMode,
+            openPolicySettingsIfBlocked = false,
+        )
+        val finalMode = if (nextMode == AudioManager.RINGER_MODE_SILENT && effectiveMode != AudioManager.RINGER_MODE_SILENT) {
+            val fallback = if (currentSystemMode == AudioManager.RINGER_MODE_NORMAL) {
                 AudioManager.RINGER_MODE_VIBRATE
             } else {
                 AudioManager.RINGER_MODE_NORMAL
             }
-            try {
-                audioManager?.ringerMode = fallbackMode
-            } catch (_: Exception) {
-            }
-        } catch (_: Exception) {
+            applySystemRingerMode(context = context, targetMode = fallback, openPolicySettingsIfBlocked = false)
+        } else {
+            effectiveMode
         }
 
-        RingerToggleAppWidget().update(context, glanceId)
+        syncAllRingerWidgets(context, finalMode)
+    }
+}
+
+// ---------------------------------------------------------------------------
+// 7-9. Dedicated Mute / Vibrate / Ring Quick Button Widgets
+// ---------------------------------------------------------------------------
+
+class MuteToggleAppWidgetReceiver : GlanceAppWidgetReceiver() {
+    override val glanceAppWidget: GlanceAppWidget = MuteToggleAppWidget()
+}
+
+class MuteToggleAppWidget : BaseRingerModeButtonAppWidget(
+    targetMode = AudioManager.RINGER_MODE_SILENT,
+    toggleType = QuickToggleType.MUTE,
+    iconRes = R.drawable.ic_toggle_ringer_silent,
+    contentDescription = "Set Mute / Silent Mode",
+    fallbackLabel = "Mute",
+)
+
+class VibrateToggleAppWidgetReceiver : GlanceAppWidgetReceiver() {
+    override val glanceAppWidget: GlanceAppWidget = VibrateToggleAppWidget()
+}
+
+class VibrateToggleAppWidget : BaseRingerModeButtonAppWidget(
+    targetMode = AudioManager.RINGER_MODE_VIBRATE,
+    toggleType = QuickToggleType.VIBRATE,
+    iconRes = R.drawable.ic_toggle_ringer_vibrate,
+    contentDescription = "Set Vibrate Mode",
+    fallbackLabel = "Vibrate",
+)
+
+class RingToggleAppWidgetReceiver : GlanceAppWidgetReceiver() {
+    override val glanceAppWidget: GlanceAppWidget = RingToggleAppWidget()
+}
+
+class RingToggleAppWidget : BaseRingerModeButtonAppWidget(
+    targetMode = AudioManager.RINGER_MODE_NORMAL,
+    toggleType = QuickToggleType.RING,
+    iconRes = R.drawable.ic_toggle_ringer_normal,
+    contentDescription = "Set Ring / Sound Mode",
+    fallbackLabel = "Ring",
+)
+
+abstract class BaseRingerModeButtonAppWidget(
+    private val targetMode: Int,
+    private val toggleType: QuickToggleType,
+    @param:DrawableRes private val iconRes: Int,
+    private val contentDescription: String,
+    private val fallbackLabel: String,
+) : BaseQuickToggleAppWidget() {
+
+    private fun readSystemRingerMode(context: Context): Int = try {
+        context.getSystemService(AudioManager::class.java)?.ringerMode
+            ?: AudioManager.RINGER_MODE_NORMAL
+    } catch (_: Exception) {
+        AudioManager.RINGER_MODE_NORMAL
+    }
+
+    override suspend fun provideGlance(context: Context, id: GlanceId) {
+        val systemRingerMode = readSystemRingerMode(context)
+        val fallbackStyle = QuickToggleStyleRepository.getStyle(context, toggleType)
+        val clickAction = actionRunCallback<SetRingerModeAction>(
+            actionParametersOf(SetRingerModeAction.KEY_TARGET_MODE to targetMode),
+        )
+        provideContent {
+            val prefs = currentState<Preferences>()
+            val mode = prefs[RingerToggleAppWidget.KEY_RINGER_MODE] ?: systemRingerMode
+            val style = prefs[KEY_BUTTON_STYLE]?.let(QuickButtonStyle::fromId) ?: fallbackStyle
+            MaterialYouGlanceTheme {
+                QuickToggleButtonContent(
+                    iconRes = iconRes,
+                    contentDescription = contentDescription,
+                    shape = style.toShape(),
+                    isActive = mode == targetMode,
+                    onClick = clickAction,
+                )
+            }
+        }
+    }
+
+    override suspend fun providePreview(context: Context, widgetCategory: Int) {
+        val systemRingerMode = readSystemRingerMode(context)
+        val style = QuickToggleStyleRepository.getStyle(context, toggleType)
+        val clickAction = actionRunCallback<SetRingerModeAction>(
+            actionParametersOf(SetRingerModeAction.KEY_TARGET_MODE to targetMode),
+        )
+        provideContent {
+            MaterialYouGlanceTheme {
+                QuickToggleButtonContent(
+                    iconRes = iconRes,
+                    contentDescription = contentDescription,
+                    shape = style.toShape(),
+                    isActive = systemRingerMode == targetMode,
+                    onClick = clickAction,
+                )
+            }
+        }
+    }
+
+    override fun onCompositionError(context: Context, glanceId: GlanceId, appWidgetId: Int, throwable: Throwable) {
+        showWidgetErrorFallback(context, appWidgetId, fallbackLabel)
+    }
+}
+
+class SetRingerModeAction : ActionCallback {
+    override suspend fun onAction(
+        context: Context,
+        glanceId: GlanceId,
+        parameters: ActionParameters,
+    ) {
+        val targetMode = parameters[KEY_TARGET_MODE] ?: AudioManager.RINGER_MODE_NORMAL
+        val effectiveMode = applySystemRingerMode(
+            context = context,
+            targetMode = targetMode,
+            openPolicySettingsIfBlocked = true,
+        )
+        syncAllRingerWidgets(context, effectiveMode)
+    }
+
+    companion object {
+        val KEY_TARGET_MODE = ActionParameters.Key<Int>("target_ringer_mode")
+    }
+}
+
+private fun applySystemRingerMode(
+    context: Context,
+    targetMode: Int,
+    openPolicySettingsIfBlocked: Boolean,
+): Int {
+    val audioManager = context.getSystemService(AudioManager::class.java)
+    if (targetMode == AudioManager.RINGER_MODE_SILENT) {
+        val notificationManager = context.getSystemService(NotificationManager::class.java)
+        if (notificationManager != null && !notificationManager.isNotificationPolicyAccessGranted) {
+            if (openPolicySettingsIfBlocked) {
+                try {
+                    val intent = Intent(Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS).apply {
+                        flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    }
+                    context.startActivity(intent)
+                } catch (_: Exception) {
+                }
+            }
+            return audioManager?.ringerMode ?: AudioManager.RINGER_MODE_NORMAL
+        }
+    }
+
+    try {
+        audioManager?.ringerMode = targetMode
+    } catch (_: SecurityException) {
+        if (openPolicySettingsIfBlocked) {
+            try {
+                val intent = Intent(Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS).apply {
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                }
+                context.startActivity(intent)
+            } catch (_: Exception) {
+            }
+        }
+    } catch (_: Exception) {
+    }
+
+    return try {
+        audioManager?.ringerMode ?: targetMode
+    } catch (_: Exception) {
+        targetMode
+    }
+}
+
+private suspend fun syncAllRingerWidgets(context: Context, mode: Int) {
+    val manager = GlanceAppWidgetManager(context)
+    val widgets: List<Pair<Class<out GlanceAppWidget>, () -> GlanceAppWidget>> = listOf(
+        RingerToggleAppWidget::class.java to ::RingerToggleAppWidget,
+        MuteToggleAppWidget::class.java to ::MuteToggleAppWidget,
+        VibrateToggleAppWidget::class.java to ::VibrateToggleAppWidget,
+        RingToggleAppWidget::class.java to ::RingToggleAppWidget,
+    )
+    for ((widgetClass, createWidget) in widgets) {
+        for (id in manager.getGlanceIds(widgetClass)) {
+            updateAppWidgetState(context, id) { prefs ->
+                prefs[RingerToggleAppWidget.KEY_RINGER_MODE] = mode
+            }
+            createWidget().update(context, id)
+        }
     }
 }
 

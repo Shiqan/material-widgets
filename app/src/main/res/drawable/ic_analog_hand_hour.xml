@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="160dp"
+    android:height="160dp"
+    android:viewportWidth="160"
+    android:viewportHeight="160">
+    <!-- Hour hand: thick rounded capsule pivoted at (80, 80) pointing to 12 o'clock -->
+    <path
+        android:fillColor="@color/widget_preview_on_secondary_container"
+        android:pathData="M80,40c4.42,0 8,3.58 8,8v32c0,4.42 -3.58,8 -8,8s-8,-3.58 -8,-8V48c0,-4.42 3.58,-8 8,-8z" />
+</vector>

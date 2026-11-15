@@ -36,10 +36,15 @@ import androidx.compose.material.icons.rounded.LocationCity
 import androidx.compose.material.icons.rounded.Memory
 import androidx.compose.material.icons.rounded.MusicNote
 import androidx.compose.material.icons.rounded.NotificationsActive
+import androidx.compose.material.icons.rounded.NotificationsOff
 import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.material.icons.rounded.Refresh
+import androidx.compose.material.icons.rounded.Schedule
 import androidx.compose.material.icons.rounded.ScreenRotation
+import androidx.compose.material.icons.rounded.Storage
 import androidx.compose.material.icons.rounded.SwapVert
+import androidx.compose.material.icons.rounded.Vibration
+import androidx.compose.material.icons.rounded.WbSunny
 import androidx.compose.material.icons.rounded.Wifi
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
@@ -89,24 +94,34 @@ import dev.shiqan.materialwidgets.data.DefaultDataRepository
 import dev.shiqan.materialwidgets.ui.theme.MaterialWidgetsTheme
 import dev.shiqan.materialwidgets.widget.calendar.CalendarCardAppWidgetReceiver
 import dev.shiqan.materialwidgets.widget.calendar.CircleClockAppWidgetReceiver
+import dev.shiqan.materialwidgets.widget.calendar.DateClockPillAppWidgetReceiver
+import dev.shiqan.materialwidgets.widget.calendar.DatePillAppWidgetReceiver
+import dev.shiqan.materialwidgets.widget.clock.AnalogClockAppWidgetReceiver
 import dev.shiqan.materialwidgets.widget.clock.ClockAppWidgetReceiver
+import dev.shiqan.materialwidgets.widget.clock.ClockBatteryPillAppWidgetReceiver
 import dev.shiqan.materialwidgets.widget.music.MediaSessionControllerHelper
 import dev.shiqan.materialwidgets.widget.music.MusicAppWidgetReceiver
 import dev.shiqan.materialwidgets.widget.music.MusicPillAppWidgetReceiver
 import dev.shiqan.materialwidgets.widget.system.BatteryAppWidgetReceiver
+import dev.shiqan.materialwidgets.widget.system.RamPillAppWidgetReceiver
+import dev.shiqan.materialwidgets.widget.system.StoragePillAppWidgetReceiver
 import dev.shiqan.materialwidgets.widget.system.StorageRamAppWidgetReceiver
 import dev.shiqan.materialwidgets.widget.toggles.BluetoothToggleAppWidgetReceiver
 import dev.shiqan.materialwidgets.widget.toggles.DataToggleAppWidgetReceiver
 import dev.shiqan.materialwidgets.widget.toggles.FlashlightToggleAppWidgetReceiver
+import dev.shiqan.materialwidgets.widget.toggles.MuteToggleAppWidgetReceiver
 import dev.shiqan.materialwidgets.widget.toggles.QuickButtonStyle
 import dev.shiqan.materialwidgets.widget.toggles.QuickToggleStyleRepository
 import dev.shiqan.materialwidgets.widget.toggles.QuickToggleType
+import dev.shiqan.materialwidgets.widget.toggles.RingToggleAppWidgetReceiver
 import dev.shiqan.materialwidgets.widget.toggles.RingerToggleAppWidgetReceiver
 import dev.shiqan.materialwidgets.widget.toggles.RotateToggleAppWidgetReceiver
+import dev.shiqan.materialwidgets.widget.toggles.VibrateToggleAppWidgetReceiver
 import dev.shiqan.materialwidgets.widget.toggles.WifiToggleAppWidgetReceiver
 import dev.shiqan.materialwidgets.widget.util.publishAllWidgetPreviews
 import dev.shiqan.materialwidgets.widget.util.requestPinGlanceWidget
 import dev.shiqan.materialwidgets.widget.weather.WeatherAppWidgetReceiver
+import dev.shiqan.materialwidgets.widget.weather.WeatherPillAppWidgetReceiver
 import dev.shiqan.materialwidgets.widget.weather.WeatherRepository
 import dev.shiqan.materialwidgets.widget.weather.formatTemp
 import kotlinx.coroutines.CoroutineScope
@@ -212,12 +227,56 @@ internal fun MainScreen(data: List<String>, modifier: Modifier = Modifier) {
 
             item {
                 WidgetGalleryCard(
+                    title = stringResource(R.string.clock_battery_pill_widget_name),
+                    subtitle = "Stadium Pill (3x2) • Date Header, Bold Digital Clock & Live Battery %",
+                    icon = Icons.Rounded.AccessTime,
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    onPinClick = { pinWidget(ClockBatteryPillAppWidgetReceiver::class.java) },
+                )
+            }
+
+            item {
+                WidgetGalleryCard(
+                    title = stringResource(R.string.analog_clock_widget_name),
+                    subtitle = "12-Lobe Scalloped Analog Clock (2x2) • Curved Date & Rounded Hands",
+                    icon = Icons.Rounded.Schedule,
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    onPinClick = { pinWidget(AnalogClockAppWidgetReceiver::class.java) },
+                )
+            }
+
+            item {
+                WidgetGalleryCard(
                     title = stringResource(R.string.calendar_card_widget_name),
                     subtitle = "3-Day Strip Calendar Card (2x2) • Scalloped Today Badge, Month & Year",
                     icon = Icons.Rounded.CalendarMonth,
                     containerColor = MaterialTheme.colorScheme.secondaryContainer,
                     contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
                     onPinClick = { pinWidget(CalendarCardAppWidgetReceiver::class.java) },
+                )
+            }
+
+            item {
+                WidgetGalleryCard(
+                    title = stringResource(R.string.date_clock_pill_widget_name),
+                    subtitle = "Stadium Bar (4x1) • Full Date, Month/Year & Dual Scalloped Hour/Min Badges",
+                    icon = Icons.Rounded.CalendarMonth,
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                    onPinClick = { pinWidget(DateClockPillAppWidgetReceiver::class.java) },
+                )
+            }
+
+            item {
+                WidgetGalleryCard(
+                    title = stringResource(R.string.date_pill_widget_name),
+                    subtitle = "Compact Stadium Pill (2x1) • Scalloped Day Badge, Month & Weekday",
+                    icon = Icons.Rounded.CalendarMonth,
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                    onPinClick = { pinWidget(DatePillAppWidgetReceiver::class.java) },
                 )
             }
 
@@ -240,6 +299,17 @@ internal fun MainScreen(data: List<String>, modifier: Modifier = Modifier) {
                     containerColor = MaterialTheme.colorScheme.secondaryContainer,
                     contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
                     onPinClick = { pinWidget(WeatherAppWidgetReceiver::class.java) },
+                )
+            }
+
+            item {
+                WidgetGalleryCard(
+                    title = stringResource(R.string.weather_pill_widget_name),
+                    subtitle = "Stadium Pill (4x2) • Scalloped Sun Badge, Date, Temp & H/L Range",
+                    icon = Icons.Rounded.WbSunny,
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                    onPinClick = { pinWidget(WeatherPillAppWidgetReceiver::class.java) },
                 )
             }
 
@@ -288,6 +358,28 @@ internal fun MainScreen(data: List<String>, modifier: Modifier = Modifier) {
                     containerColor = MaterialTheme.colorScheme.secondaryContainer,
                     contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
                     onPinClick = { pinWidget(StorageRamAppWidgetReceiver::class.java) },
+                )
+            }
+
+            item {
+                WidgetGalleryCard(
+                    title = stringResource(R.string.storage_pill_widget_name),
+                    subtitle = "2x1 Rounded Storage Card • Icon & Flush-Right Capacity Pill",
+                    icon = Icons.Rounded.Storage,
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                    onPinClick = { pinWidget(StoragePillAppWidgetReceiver::class.java) },
+                )
+            }
+
+            item {
+                WidgetGalleryCard(
+                    title = stringResource(R.string.ram_pill_widget_name),
+                    subtitle = "2x1 Rounded RAM Card • Flush-Left Usage Pill & Chip Icon",
+                    icon = Icons.Rounded.Memory,
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                    onPinClick = { pinWidget(RamPillAppWidgetReceiver::class.java) },
                 )
             }
 
@@ -373,6 +465,45 @@ internal fun MainScreen(data: List<String>, modifier: Modifier = Modifier) {
                     selectedStyle = quickToggleStyles[QuickToggleType.RINGER] ?: QuickButtonStyle.DEFAULT,
                     onToggleStyle = { toggleQuickStyle(QuickToggleType.RINGER) },
                     onPinClick = { pinWidget(RingerToggleAppWidgetReceiver::class.java) },
+                )
+            }
+
+            item {
+                WidgetGalleryCard(
+                    title = stringResource(R.string.mute_toggle_widget_name),
+                    subtitle = "1x1 Quick Button • Switches Ringer to Silent / Mute Mode",
+                    icon = Icons.Rounded.NotificationsOff,
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                    selectedStyle = quickToggleStyles[QuickToggleType.MUTE] ?: QuickButtonStyle.DEFAULT,
+                    onToggleStyle = { toggleQuickStyle(QuickToggleType.MUTE) },
+                    onPinClick = { pinWidget(MuteToggleAppWidgetReceiver::class.java) },
+                )
+            }
+
+            item {
+                WidgetGalleryCard(
+                    title = stringResource(R.string.vibrate_toggle_widget_name),
+                    subtitle = "1x1 Quick Button • Switches Ringer to Vibrate Mode",
+                    icon = Icons.Rounded.Vibration,
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    selectedStyle = quickToggleStyles[QuickToggleType.VIBRATE] ?: QuickButtonStyle.DEFAULT,
+                    onToggleStyle = { toggleQuickStyle(QuickToggleType.VIBRATE) },
+                    onPinClick = { pinWidget(VibrateToggleAppWidgetReceiver::class.java) },
+                )
+            }
+
+            item {
+                WidgetGalleryCard(
+                    title = stringResource(R.string.ring_toggle_widget_name),
+                    subtitle = "1x1 Quick Button • Switches Ringer to Normal / Sound Mode",
+                    icon = Icons.Rounded.NotificationsActive,
+                    containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+                    selectedStyle = quickToggleStyles[QuickToggleType.RING] ?: QuickButtonStyle.DEFAULT,
+                    onToggleStyle = { toggleQuickStyle(QuickToggleType.RING) },
+                    onPinClick = { pinWidget(RingToggleAppWidgetReceiver::class.java) },
                 )
             }
 

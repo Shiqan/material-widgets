@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_widget_card_20"
+    android:backgroundTint="@color/widget_preview_secondary_container"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingVertical="10dp">
+
+    <FrameLayout
+        android:layout_width="wrap_content"
+        android:layout_height="38dp"
+        android:background="@drawable/bg_pill_flush_left"
+        android:backgroundTint="@color/widget_preview_primary_container"
+        android:paddingHorizontal="12dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:singleLine="true"
+            android:text="5.4/8.0 GB"
+            android:textColor="@color/widget_preview_on_primary_container"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+    </FrameLayout>
+
+    <FrameLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1">
+
+        <ImageView
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:layout_gravity="center"
+            android:contentDescription="@null"
+            android:src="@drawable/ic_memory"
+            android:tint="@color/widget_preview_primary" />
+    </FrameLayout>
+</LinearLayout>

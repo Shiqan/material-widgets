@@ -277,26 +277,51 @@ object WeatherRepository {
         val lastUpdated = getLastUpdatedMs(context)
 
         val manager = GlanceAppWidgetManager(context)
-        val glanceIds = manager.getGlanceIds(WeatherAppWidget::class.java)
-        for (glanceId in glanceIds) {
-            updateAppWidgetState(context, glanceId) { glancePrefs ->
-                glancePrefs[WeatherAppWidget.KEY_USE_FAHRENHEIT] = useFahrenheit
-                glancePrefs[WeatherAppWidget.KEY_CITY] = snapshot.city
-                glancePrefs[WeatherAppWidget.KEY_CONDITION] = snapshot.condition
-                glancePrefs[WeatherAppWidget.KEY_TEMP_C] = snapshot.tempCelsius
-                glancePrefs[WeatherAppWidget.KEY_HIGH_C] = snapshot.highCelsius
-                glancePrefs[WeatherAppWidget.KEY_LOW_C] = snapshot.lowCelsius
-                glancePrefs[WeatherAppWidget.KEY_HUMIDITY] = snapshot.humidityPercent
-                glancePrefs[WeatherAppWidget.KEY_WIND_KMH] = snapshot.windKmh
-                glancePrefs[WeatherAppWidget.KEY_UV_INDEX] = snapshot.uvIndex
-                glancePrefs[WeatherAppWidget.KEY_WEATHER_CODE] = code
-                glancePrefs[WeatherAppWidget.KEY_FORECAST] = serializedForecast
-                glancePrefs[WeatherAppWidget.KEY_LAST_UPDATED] = lastUpdated
-            }
+        val writeSnapshot: (androidx.datastore.preferences.core.MutablePreferences) -> Unit = { glancePrefs ->
+            glancePrefs[WeatherAppWidget.KEY_USE_FAHRENHEIT] = useFahrenheit
+            glancePrefs[WeatherAppWidget.KEY_CITY] = snapshot.city
+            glancePrefs[WeatherAppWidget.KEY_CONDITION] = snapshot.condition
+            glancePrefs[WeatherAppWidget.KEY_TEMP_C] = snapshot.tempCelsius
+            glancePrefs[WeatherAppWidget.KEY_HIGH_C] = snapshot.highCelsius
+            glancePrefs[WeatherAppWidget.KEY_LOW_C] = snapshot.lowCelsius
+            glancePrefs[WeatherAppWidget.KEY_HUMIDITY] = snapshot.humidityPercent
+            glancePrefs[WeatherAppWidget.KEY_WIND_KMH] = snapshot.windKmh
+            glancePrefs[WeatherAppWidget.KEY_UV_INDEX] = snapshot.uvIndex
+            glancePrefs[WeatherAppWidget.KEY_WEATHER_CODE] = code
+            glancePrefs[WeatherAppWidget.KEY_FORECAST] = serializedForecast
+            glancePrefs[WeatherAppWidget.KEY_LAST_UPDATED] = lastUpdated
+        }
+
+        for (glanceId in manager.getGlanceIds(WeatherAppWidget::class.java)) {
+            updateAppWidgetState(context, glanceId, writeSnapshot)
             WeatherAppWidget().update(context, glanceId)
         }
+        for (glanceId in manager.getGlanceIds(WeatherPillAppWidget::class.java)) {
+            updateAppWidgetState(context, glanceId, writeSnapshot)
+            WeatherPillAppWidget().update(context, glanceId)
+        }
         refreshWidgetPreview(context, WeatherAppWidgetReceiver::class)
+        refreshWidgetPreview(context, WeatherPillAppWidgetReceiver::class)
     }
+
+    internal fun resolveSnapshotFromPrefs(
+        prefs: Preferences,
+        fallbackSnapshot: WeatherSnapshot,
+    ): WeatherSnapshot = WeatherSnapshot(
+        city = prefs[WeatherAppWidget.KEY_CITY] ?: fallbackSnapshot.city,
+        condition = prefs[WeatherAppWidget.KEY_CONDITION] ?: fallbackSnapshot.condition,
+        tempCelsius = prefs[WeatherAppWidget.KEY_TEMP_C] ?: fallbackSnapshot.tempCelsius,
+        highCelsius = prefs[WeatherAppWidget.KEY_HIGH_C] ?: fallbackSnapshot.highCelsius,
+        lowCelsius = prefs[WeatherAppWidget.KEY_LOW_C] ?: fallbackSnapshot.lowCelsius,
+        humidityPercent = prefs[WeatherAppWidget.KEY_HUMIDITY] ?: fallbackSnapshot.humidityPercent,
+        windKmh = prefs[WeatherAppWidget.KEY_WIND_KMH] ?: fallbackSnapshot.windKmh,
+        uvIndex = prefs[WeatherAppWidget.KEY_UV_INDEX] ?: fallbackSnapshot.uvIndex,
+        iconRes = prefs[WeatherAppWidget.KEY_WEATHER_CODE]?.let(::iconForWeatherCode)
+            ?: fallbackSnapshot.iconRes,
+        forecastHours = deserializeForecast(prefs[WeatherAppWidget.KEY_FORECAST])
+            .ifEmpty { fallbackSnapshot.forecastHours },
+        isLive = (prefs[WeatherAppWidget.KEY_LAST_UPDATED] ?: 0L) > 0L || fallbackSnapshot.isLive,
+    )
 
     private fun resolveCoordinates(
         p: android.content.SharedPreferences,
