@@ -329,9 +329,14 @@ object WeatherRepository {
             updateAppWidgetState(context, glanceId, writeSnapshot)
             WeatherTiltedPillAppWidget().update(context, glanceId)
         }
+        for (glanceId in manager.getGlanceIds(WeatherTiltedPillReverseAppWidget::class.java)) {
+            updateAppWidgetState(context, glanceId, writeSnapshot)
+            WeatherTiltedPillReverseAppWidget().update(context, glanceId)
+        }
         refreshWidgetPreview(context, WeatherAppWidgetReceiver::class)
         refreshWidgetPreview(context, WeatherPillAppWidgetReceiver::class)
         refreshWidgetPreview(context, WeatherTiltedPillAppWidgetReceiver::class)
+        refreshWidgetPreview(context, WeatherTiltedPillReverseAppWidgetReceiver::class)
     }
 
     internal fun resolveSnapshotFromPrefs(

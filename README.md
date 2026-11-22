@@ -39,9 +39,9 @@ All screenshots below are rendered in [`.github/screenshots/`](.github/screensho
 | <img src=".github/screenshots/clock-battery-pill.png" alt="Clock and Battery Pill" width="210" /> | <img src=".github/screenshots/date-pill.png" alt="Date Pill" width="180" /> | <img src=".github/screenshots/date-clock-pill.png" alt="Date and Clock Pill" width="280" /> |
 
 ### Weather & Music
-| Weather | Tilted Weather Pill | Weather Pill |
-| :---: | :---: | :---: |
-| <img src=".github/screenshots/weather.png" alt="Weather" width="150" /> | <img src=".github/screenshots/weather-tilted-pill.png" alt="Tilted Weather Pill" width="150" /> | <img src=".github/screenshots/weather-pill.png" alt="Weather Pill" width="260" /> |
+| Weather | Tilted Weather Pill | Tilted Weather Pill (Reverse) | Weather Pill |
+| :---: | :---: | :---: | :---: |
+| <img src=".github/screenshots/weather.png" alt="Weather" width="150" /> | <img src=".github/screenshots/weather-tilted-pill.png" alt="Tilted Weather Pill" width="150" /> | <img src=".github/screenshots/weather-tilted-pill-reverse.png" alt="Tilted Weather Pill (Reverse)" width="150" /> | <img src=".github/screenshots/weather-pill.png" alt="Weather Pill" width="240" /> |
 
 | Music | Music Pill |
 | :---: | :---: |

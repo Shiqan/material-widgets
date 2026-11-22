@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <FrameLayout
+        android:layout_width="156dp"
+        android:layout_height="156dp"
+        android:layout_gravity="center"
+        android:background="@drawable/bg_weather_tilted_pill_reverse"
+        android:backgroundTint="@color/widget_preview_secondary_container"
+        android:padding="17dp">
+
+        <FrameLayout
+            android:layout_width="68dp"
+            android:layout_height="68dp"
+            android:layout_gravity="top|start">
+
+            <ImageView
+                android:layout_width="46dp"
+                android:layout_height="46dp"
+                android:layout_gravity="center"
+                android:contentDescription="@null"
+                android:src="@drawable/ic_weather_sun_scalloped" />
+        </FrameLayout>
+
+        <FrameLayout
+            android:layout_width="68dp"
+            android:layout_height="68dp"
+            android:layout_gravity="bottom|end">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:includeFontPadding="false"
+                android:text="22°"
+                android:textColor="@color/widget_preview_on_secondary_container"
+                android:textSize="36sp"
+                android:textStyle="bold" />
+        </FrameLayout>
+    </FrameLayout>
+</FrameLayout>

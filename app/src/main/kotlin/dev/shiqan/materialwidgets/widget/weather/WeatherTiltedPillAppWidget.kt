@@ -45,13 +45,16 @@ class WeatherTiltedPillAppWidgetReceiver : GlanceAppWidgetReceiver() {
     override val glanceAppWidget: GlanceAppWidget = WeatherTiltedPillAppWidget()
 }
 
+class WeatherTiltedPillReverseAppWidgetReceiver : GlanceAppWidgetReceiver() {
+    override val glanceAppWidget: GlanceAppWidget = WeatherTiltedPillReverseAppWidget()
+}
+
 /**
- * Pixel-inspired 2x2 Tilted Weather Pill Widget:
- * - Rounded rectangle rotated 45° (`secondaryContainer`)
- * - Centered current weather icon (tap to refresh live weather)
- * - Bold temperature readout below (tap to toggle °C / °F)
+ * Shared base for the Pixel-inspired 2x2 Tilted Weather Pill widgets (`-45°` or `+45°`).
  */
-class WeatherTiltedPillAppWidget : GlanceAppWidget() {
+abstract class BaseWeatherTiltedPillAppWidget(
+    private val reverseTilt: Boolean,
+) : GlanceAppWidget() {
     override val stateDefinition: GlanceStateDefinition<*> = PreferencesGlanceStateDefinition
     override val sizeMode: SizeMode = SizeMode.Exact
     override val previewSizeMode: PreviewSizeMode = SizeMode.Responsive(setOf(DpSize(160.dp, 160.dp)))
@@ -75,6 +78,7 @@ class WeatherTiltedPillAppWidget : GlanceAppWidget() {
                 WeatherTiltedPillWidgetContent(
                     weather = weather,
                     useFahrenheit = useFahrenheit,
+                    reverseTilt = reverseTilt,
                 )
             }
         }
@@ -88,6 +92,7 @@ class WeatherTiltedPillAppWidget : GlanceAppWidget() {
                 WeatherTiltedPillWidgetContent(
                     weather = snapshot,
                     useFahrenheit = useFahrenheit,
+                    reverseTilt = reverseTilt,
                 )
             }
         }
@@ -103,10 +108,15 @@ class WeatherTiltedPillAppWidget : GlanceAppWidget() {
     }
 }
 
+class WeatherTiltedPillAppWidget : BaseWeatherTiltedPillAppWidget(reverseTilt = false)
+
+class WeatherTiltedPillReverseAppWidget : BaseWeatherTiltedPillAppWidget(reverseTilt = true)
+
 @Composable
 fun WeatherTiltedPillWidgetContent(
     weather: WeatherSnapshot,
     useFahrenheit: Boolean = false,
+    reverseTilt: Boolean = false,
 ) {
     val size = LocalSize.current
     val containerSize = size.width.coerceAtMost(size.height).coerceAtLeast(110.dp)
@@ -114,6 +124,24 @@ fun WeatherTiltedPillWidgetContent(
     val lobeBoxSize = containerSize * 0.44f
     val iconSize = (containerSize * 0.30f).coerceIn(32.dp, 68.dp)
     val tempSp = (containerSize.value * 0.23f).coerceIn(24f, 50f).sp
+
+    val pillBackground = if (reverseTilt) {
+        R.drawable.bg_weather_tilted_pill_reverse
+    } else {
+        R.drawable.bg_weather_tilted_pill
+    }
+    val iconAlignment = if (reverseTilt) Alignment.TopStart else Alignment.TopEnd
+    val iconPaddingModifier = if (reverseTilt) {
+        GlanceModifier.padding(top = lobeInset, start = lobeInset)
+    } else {
+        GlanceModifier.padding(top = lobeInset, end = lobeInset)
+    }
+    val tempAlignment = if (reverseTilt) Alignment.BottomEnd else Alignment.BottomStart
+    val tempPaddingModifier = if (reverseTilt) {
+        GlanceModifier.padding(bottom = lobeInset, end = lobeInset)
+    } else {
+        GlanceModifier.padding(bottom = lobeInset, start = lobeInset)
+    }
 
     Box(
         contentAlignment = Alignment.Center,
@@ -125,17 +153,17 @@ fun WeatherTiltedPillWidgetContent(
                 .size(containerSize)
                 .appWidgetBackground()
                 .background(
-                    imageProvider = ImageProvider(R.drawable.bg_weather_tilted_pill),
+                    imageProvider = ImageProvider(pillBackground),
                     colorFilter = ColorFilter.tint(GlanceTheme.colors.secondaryContainer),
                 )
                 .clickable(actionRunCallback<CycleWeatherAction>()),
         ) {
-            // Top-right tilted lobe: current weather icon
+            // Upper tilted lobe: current weather icon
             Box(
-                contentAlignment = Alignment.TopEnd,
+                contentAlignment = iconAlignment,
                 modifier = GlanceModifier
                     .fillMaxSize()
-                    .padding(top = lobeInset, end = lobeInset),
+                    .then(iconPaddingModifier),
             ) {
                 Box(
                     contentAlignment = Alignment.Center,
@@ -160,12 +188,12 @@ fun WeatherTiltedPillWidgetContent(
                 }
             }
 
-            // Bottom-left tilted lobe: bold current temperature
+            // Lower tilted lobe: bold current temperature
             Box(
-                contentAlignment = Alignment.BottomStart,
+                contentAlignment = tempAlignment,
                 modifier = GlanceModifier
                     .fillMaxSize()
-                    .padding(bottom = lobeInset, start = lobeInset),
+                    .then(tempPaddingModifier),
             ) {
                 Box(
                     contentAlignment = Alignment.Center,
@@ -195,6 +223,18 @@ fun WeatherTiltedPillWidgetPreview() {
     MaterialYouGlanceTheme {
         WeatherTiltedPillWidgetContent(
             weather = SAMPLE_WEATHER_STATES[1],
+        )
+    }
+}
+
+@OptIn(ExperimentalGlancePreviewApi::class)
+@Preview(widthDp = 160, heightDp = 160)
+@Composable
+fun WeatherTiltedPillReverseWidgetPreview() {
+    MaterialYouGlanceTheme {
+        WeatherTiltedPillWidgetContent(
+            weather = SAMPLE_WEATHER_STATES[1],
+            reverseTilt = true,
         )
     }
 }

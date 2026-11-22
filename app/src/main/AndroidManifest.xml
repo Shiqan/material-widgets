@@ -267,6 +267,18 @@
         </receiver>
 
         <receiver
+            android:name=".widget.weather.WeatherTiltedPillReverseAppWidgetReceiver"
+            android:exported="true"
+            android:label="@string/weather_tilted_pill_reverse_widget_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/weather_tilted_pill_reverse_widget_info" />
+        </receiver>
+
+        <receiver
             android:name=".widget.clock.ClockBatteryPillAppWidgetReceiver"
             android:exported="true"
             android:label="@string/clock_battery_pill_widget_name">

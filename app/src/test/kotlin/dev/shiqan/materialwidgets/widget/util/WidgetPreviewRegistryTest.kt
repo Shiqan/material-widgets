@@ -28,6 +28,7 @@ import dev.shiqan.materialwidgets.widget.toggles.WifiToggleAppWidgetReceiver
 import dev.shiqan.materialwidgets.widget.weather.WeatherAppWidgetReceiver
 import dev.shiqan.materialwidgets.widget.weather.WeatherPillAppWidgetReceiver
 import dev.shiqan.materialwidgets.widget.weather.WeatherTiltedPillAppWidgetReceiver
+import dev.shiqan.materialwidgets.widget.weather.WeatherTiltedPillReverseAppWidgetReceiver
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
@@ -47,6 +48,7 @@ class WidgetPreviewRegistryTest {
         WeatherAppWidgetReceiver::class.java,
         WeatherPillAppWidgetReceiver::class.java,
         WeatherTiltedPillAppWidgetReceiver::class.java,
+        WeatherTiltedPillReverseAppWidgetReceiver::class.java,
         MusicAppWidgetReceiver::class.java,
         MusicPillAppWidgetReceiver::class.java,
         BatteryAppWidgetReceiver::class.java,

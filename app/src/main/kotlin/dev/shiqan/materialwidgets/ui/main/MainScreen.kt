@@ -124,6 +124,7 @@ import dev.shiqan.materialwidgets.widget.weather.WeatherAppWidgetReceiver
 import dev.shiqan.materialwidgets.widget.weather.WeatherPillAppWidgetReceiver
 import dev.shiqan.materialwidgets.widget.weather.WeatherRepository
 import dev.shiqan.materialwidgets.widget.weather.WeatherTiltedPillAppWidgetReceiver
+import dev.shiqan.materialwidgets.widget.weather.WeatherTiltedPillReverseAppWidgetReceiver
 import dev.shiqan.materialwidgets.widget.weather.formatTemp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -322,6 +323,17 @@ internal fun MainScreen(data: List<String>, modifier: Modifier = Modifier) {
                     containerColor = MaterialTheme.colorScheme.secondaryContainer,
                     contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
                     onPinClick = { pinWidget(WeatherTiltedPillAppWidgetReceiver::class.java) },
+                )
+            }
+
+            item {
+                WidgetGalleryCard(
+                    title = stringResource(R.string.weather_tilted_pill_reverse_widget_name),
+                    subtitle = "45° Reverse-Tilted Pill (2x2) • Top-Left Icon & Bottom-Right Temperature",
+                    icon = Icons.Rounded.WbSunny,
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                    onPinClick = { pinWidget(WeatherTiltedPillReverseAppWidgetReceiver::class.java) },
                 )
             }
 
