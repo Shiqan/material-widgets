@@ -4,7 +4,7 @@ A modern, native Android widget pack built with **Kotlin**, **Jetpack Compose**,
 
 ---
 
-## ✨ Features & Widgets
+## Features & Widgets
 
 - **Dynamic Material You Theming (`MaterialYouGlanceTheme`)**
   - Uses `GlanceTheme.colors` on Android 12+ (API 31+) to pull live system dynamic colors (`primaryContainer`, `secondaryContainer`, `tertiaryContainer`, `surfaceVariant`, etc.).
@@ -22,32 +22,35 @@ A modern, native Android widget pack built with **Kotlin**, **Jetpack Compose**,
 
 ---
 
-## 🖼️ Widget Gallery
+## Widget Gallery
 
-All screenshots below are rendered with live **Material You** dynamic colors on Android 15 and stored in [`.github/screenshots/`](.github/screenshots).
+All screenshots below are rendered in [`.github/screenshots/`](.github/screenshots) using the **Material You Light** color theme (Android 15's default blue/periwinkle and pastel pink dynamic palette: `#D9E2FF`, `#475D92`, `#FDD7FA`).
+
+> [!NOTE]
+> These colors are only from the emulator theme used to capture the gallery. On your device, every widget automatically inherits your own wallpaper's **Material You** color palette and adapts to **Light** and **Dark** mode (with a built-in Material 3 fallback on Android 8.0–11).
 
 ### Clock & Calendar
-| Material You Clock | Material You Analog Clock | Material You Circle Clock | Material You Date Card |
+| Clock | Analog Clock | Circle Clock | Date Card |
 | :---: | :---: | :---: | :---: |
-| <img src=".github/screenshots/clock.png" alt="Material You Clock" width="150" /> | <img src=".github/screenshots/analog-clock.png" alt="Material You Analog Clock" width="150" /> | <img src=".github/screenshots/circle-clock.png" alt="Material You Circle Clock" width="150" /> | <img src=".github/screenshots/calendar-card.png" alt="Material You Date Card" width="150" /> |
+| <img src=".github/screenshots/clock.png" alt="Clock" width="150" /> | <img src=".github/screenshots/analog-clock.png" alt="Analog Clock" width="150" /> | <img src=".github/screenshots/circle-clock.png" alt="Circle Clock" width="150" /> | <img src=".github/screenshots/calendar-card.png" alt="Date Card" width="150" /> |
 
-| Material You Clock & Battery Pill | Material You Date Pill | Material You Date & Clock Pill |
+| Clock & Battery Pill | Date Pill | Date & Clock Pill |
 | :---: | :---: | :---: |
-| <img src=".github/screenshots/clock-battery-pill.png" alt="Material You Clock and Battery Pill" width="210" /> | <img src=".github/screenshots/date-pill.png" alt="Material You Date Pill" width="180" /> | <img src=".github/screenshots/date-clock-pill.png" alt="Material You Date and Clock Pill" width="280" /> |
+| <img src=".github/screenshots/clock-battery-pill.png" alt="Clock and Battery Pill" width="210" /> | <img src=".github/screenshots/date-pill.png" alt="Date Pill" width="180" /> | <img src=".github/screenshots/date-clock-pill.png" alt="Date and Clock Pill" width="280" /> |
 
 ### Weather & Music
-| Material You Weather | Material You Tilted Weather Pill | Material You Weather Pill |
+| Weather | Tilted Weather Pill | Weather Pill |
 | :---: | :---: | :---: |
-| <img src=".github/screenshots/weather.png" alt="Material You Weather" width="150" /> | <img src=".github/screenshots/weather-tilted-pill.png" alt="Material You Tilted Weather Pill" width="150" /> | <img src=".github/screenshots/weather-pill.png" alt="Material You Weather Pill" width="260" /> |
+| <img src=".github/screenshots/weather.png" alt="Weather" width="150" /> | <img src=".github/screenshots/weather-tilted-pill.png" alt="Tilted Weather Pill" width="150" /> | <img src=".github/screenshots/weather-pill.png" alt="Weather Pill" width="260" /> |
 
-| Material You Music | Material You Music Pill |
+| Music | Music Pill |
 | :---: | :---: |
-| <img src=".github/screenshots/music.png" alt="Material You Music" width="300" /> | <img src=".github/screenshots/music-pill.png" alt="Material You Music Pill" width="300" /> |
+| <img src=".github/screenshots/music.png" alt="Music" width="300" /> | <img src=".github/screenshots/music-pill.png" alt="Music Pill" width="300" /> |
 
 ### Battery & System
-| Material You Battery & Power | Material You Storage & RAM | Material You Storage Pill | Material You RAM Pill |
+| Battery & Power | Storage & RAM | Storage Pill | RAM Pill |
 | :---: | :---: | :---: | :---: |
-| <img src=".github/screenshots/battery.png" alt="Material You Battery and Power" width="150" /> | <img src=".github/screenshots/storage-ram.png" alt="Material You Storage and RAM" width="150" /> | <img src=".github/screenshots/storage-pill.png" alt="Material You Storage Pill" width="175" /> | <img src=".github/screenshots/ram-pill.png" alt="Material You RAM Pill" width="175" /> |
+| <img src=".github/screenshots/battery.png" alt="Battery and Power" width="150" /> | <img src=".github/screenshots/storage-ram.png" alt="Storage and RAM" width="150" /> | <img src=".github/screenshots/storage-pill.png" alt="Storage Pill" width="175" /> | <img src=".github/screenshots/ram-pill.png" alt="RAM Pill" width="175" /> |
 
 ### Quick Buttons
 | Wi-Fi | Mobile Data | Flashlight | Auto-Rotate | Bluetooth |
@@ -60,7 +63,7 @@ All screenshots below are rendered with live **Material You** dynamic colors on 
 
 ---
 
-## 🛠 Tech Stack & Architecture
+## Tech Stack & Architecture
 
 - **Language:** Kotlin 2.3+ (`jvmToolchain(17)`)
 - **Widget Framework:** [Jetpack Glance](https://developer.android.com/develop/ui/compose/glance) (`androidx.glance:glance-appwidget` & `androidx.glance:glance-material3`)
@@ -71,7 +74,7 @@ All screenshots below are rendered with live **Material You** dynamic colors on 
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 - **Android Studio** Ladybug / Meerkat or newer (AGP 9.0+) or **[Android CLI](https://developer.android.com/tools/agents/android-cli)**
@@ -117,7 +120,7 @@ On Windows PowerShell:
 
 ---
 
-## 📂 Project Structure
+## Project Structure
 
 ```text
 app/src/main/
@@ -140,6 +143,6 @@ app/src/main/
 
 ---
 
-## 📄 License
+## License
 
 This project is licensed under the [MIT License](LICENSE).
