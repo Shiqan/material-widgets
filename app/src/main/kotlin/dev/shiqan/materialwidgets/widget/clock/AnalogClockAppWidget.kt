@@ -225,7 +225,7 @@ fun AnalogClockWidgetContent(
     packageName: String? = null,
 ) {
     val size = LocalSize.current
-    val cookieSize = size.width.coerceAtMost(size.height).coerceAtLeast(110.dp)
+    val cookieSize = size.width.coerceAtMost(size.height)
     val alarmIntent = Intent(AlarmClock.ACTION_SHOW_ALARMS).apply {
         flags = Intent.FLAG_ACTIVITY_NEW_TASK
     }
