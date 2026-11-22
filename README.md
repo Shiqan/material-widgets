@@ -36,9 +36,9 @@ All screenshots below are rendered with live **Material You** dynamic colors on 
 | <img src=".github/screenshots/clock-battery-pill.png" alt="Material You Clock and Battery Pill" width="210" /> | <img src=".github/screenshots/date-pill.png" alt="Material You Date Pill" width="180" /> | <img src=".github/screenshots/date-clock-pill.png" alt="Material You Date and Clock Pill" width="280" /> |
 
 ### Weather & Music
-| Material You Weather | Material You Weather Pill |
-| :---: | :---: |
-| <img src=".github/screenshots/weather.png" alt="Material You Weather" width="150" /> | <img src=".github/screenshots/weather-pill.png" alt="Material You Weather Pill" width="260" /> |
+| Material You Weather | Material You Tilted Weather Pill | Material You Weather Pill |
+| :---: | :---: | :---: |
+| <img src=".github/screenshots/weather.png" alt="Material You Weather" width="150" /> | <img src=".github/screenshots/weather-tilted-pill.png" alt="Material You Tilted Weather Pill" width="150" /> | <img src=".github/screenshots/weather-pill.png" alt="Material You Weather Pill" width="260" /> |
 
 | Material You Music | Material You Music Pill |
 | :---: | :---: |

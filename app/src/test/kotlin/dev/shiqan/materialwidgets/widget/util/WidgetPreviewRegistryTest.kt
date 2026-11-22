@@ -27,6 +27,7 @@ import dev.shiqan.materialwidgets.widget.toggles.VibrateToggleAppWidgetReceiver
 import dev.shiqan.materialwidgets.widget.toggles.WifiToggleAppWidgetReceiver
 import dev.shiqan.materialwidgets.widget.weather.WeatherAppWidgetReceiver
 import dev.shiqan.materialwidgets.widget.weather.WeatherPillAppWidgetReceiver
+import dev.shiqan.materialwidgets.widget.weather.WeatherTiltedPillAppWidgetReceiver
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
@@ -45,6 +46,7 @@ class WidgetPreviewRegistryTest {
         CircleClockAppWidgetReceiver::class.java,
         WeatherAppWidgetReceiver::class.java,
         WeatherPillAppWidgetReceiver::class.java,
+        WeatherTiltedPillAppWidgetReceiver::class.java,
         MusicAppWidgetReceiver::class.java,
         MusicPillAppWidgetReceiver::class.java,
         BatteryAppWidgetReceiver::class.java,

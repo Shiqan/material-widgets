@@ -36,6 +36,8 @@
     <string name="ring_toggle_widget_description">1x1 Material You quick button to switch to Sound / Ring mode</string>
     <string name="weather_pill_widget_name">Material You Weather Pill</string>
     <string name="weather_pill_widget_description">Stadium pill weather widget with scalloped sun badge, date, current temp, and H/L range</string>
+    <string name="weather_tilted_pill_widget_name">Material You Tilted Weather Pill</string>
+    <string name="weather_tilted_pill_widget_description">Pixel-style 45° tilted rounded pill with current weather icon and temperature</string>
     <string name="clock_battery_pill_widget_name">Material You Clock &amp; Battery Pill</string>
     <string name="clock_battery_pill_widget_description">Stadium pill digital clock with date header and live battery percentage</string>
     <string name="date_clock_pill_widget_name">Material You Date &amp; Clock Pill</string>

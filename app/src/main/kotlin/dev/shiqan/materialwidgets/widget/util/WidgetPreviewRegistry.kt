@@ -58,6 +58,8 @@ import dev.shiqan.materialwidgets.widget.weather.WeatherAppWidget
 import dev.shiqan.materialwidgets.widget.weather.WeatherAppWidgetReceiver
 import dev.shiqan.materialwidgets.widget.weather.WeatherPillAppWidget
 import dev.shiqan.materialwidgets.widget.weather.WeatherPillAppWidgetReceiver
+import dev.shiqan.materialwidgets.widget.weather.WeatherTiltedPillAppWidget
+import dev.shiqan.materialwidgets.widget.weather.WeatherTiltedPillAppWidgetReceiver
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlin.reflect.KClass
@@ -79,6 +81,7 @@ object WidgetPreviewRegistry {
         WidgetPreviewSpec(CircleClockAppWidgetReceiver::class.java, DpSize(160.dp, 160.dp)) { CircleClockAppWidget() },
         WidgetPreviewSpec(WeatherAppWidgetReceiver::class.java, DpSize(160.dp, 160.dp)) { WeatherAppWidget() },
         WidgetPreviewSpec(WeatherPillAppWidgetReceiver::class.java, DpSize(280.dp, 130.dp)) { WeatherPillAppWidget() },
+        WidgetPreviewSpec(WeatherTiltedPillAppWidgetReceiver::class.java, DpSize(160.dp, 160.dp)) { WeatherTiltedPillAppWidget() },
         WidgetPreviewSpec(MusicAppWidgetReceiver::class.java, DpSize(280.dp, 140.dp)) { MusicAppWidget() },
         WidgetPreviewSpec(MusicPillAppWidgetReceiver::class.java, DpSize(320.dp, 64.dp)) { MusicPillAppWidget() },
         WidgetPreviewSpec(BatteryAppWidgetReceiver::class.java, DpSize(160.dp, 160.dp)) { BatteryAppWidget() },
