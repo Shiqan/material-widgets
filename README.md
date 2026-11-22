@@ -22,6 +22,44 @@ A modern, native Android widget pack built with **Kotlin**, **Jetpack Compose**,
 
 ---
 
+## 🖼️ Widget Gallery
+
+All screenshots below are rendered with live **Material You** dynamic colors on Android 15 and stored in [`.github/screenshots/`](.github/screenshots).
+
+### Clock & Calendar
+| Material You Clock | Material You Analog Clock | Material You Circle Clock | Material You Date Card |
+| :---: | :---: | :---: | :---: |
+| <img src=".github/screenshots/clock.png" alt="Material You Clock" width="150" /> | <img src=".github/screenshots/analog-clock.png" alt="Material You Analog Clock" width="150" /> | <img src=".github/screenshots/circle-clock.png" alt="Material You Circle Clock" width="150" /> | <img src=".github/screenshots/calendar-card.png" alt="Material You Date Card" width="150" /> |
+
+| Material You Clock & Battery Pill | Material You Date Pill | Material You Date & Clock Pill |
+| :---: | :---: | :---: |
+| <img src=".github/screenshots/clock-battery-pill.png" alt="Material You Clock and Battery Pill" width="210" /> | <img src=".github/screenshots/date-pill.png" alt="Material You Date Pill" width="180" /> | <img src=".github/screenshots/date-clock-pill.png" alt="Material You Date and Clock Pill" width="280" /> |
+
+### Weather & Music
+| Material You Weather | Material You Weather Pill |
+| :---: | :---: |
+| <img src=".github/screenshots/weather.png" alt="Material You Weather" width="150" /> | <img src=".github/screenshots/weather-pill.png" alt="Material You Weather Pill" width="260" /> |
+
+| Material You Music | Material You Music Pill |
+| :---: | :---: |
+| <img src=".github/screenshots/music.png" alt="Material You Music" width="300" /> | <img src=".github/screenshots/music-pill.png" alt="Material You Music Pill" width="300" /> |
+
+### Battery & System
+| Material You Battery & Power | Material You Storage & RAM | Material You Storage Pill | Material You RAM Pill |
+| :---: | :---: | :---: | :---: |
+| <img src=".github/screenshots/battery.png" alt="Material You Battery and Power" width="150" /> | <img src=".github/screenshots/storage-ram.png" alt="Material You Storage and RAM" width="150" /> | <img src=".github/screenshots/storage-pill.png" alt="Material You Storage Pill" width="175" /> | <img src=".github/screenshots/ram-pill.png" alt="Material You RAM Pill" width="175" /> |
+
+### Quick Buttons
+| Wi-Fi | Mobile Data | Flashlight | Auto-Rotate | Bluetooth |
+| :---: | :---: | :---: | :---: | :---: |
+| <img src=".github/screenshots/wifi-toggle.png" alt="Quick Button: Wi-Fi" width="76" /> | <img src=".github/screenshots/data-toggle.png" alt="Quick Button: Mobile Data" width="76" /> | <img src=".github/screenshots/flashlight-toggle.png" alt="Quick Button: Flashlight" width="76" /> | <img src=".github/screenshots/rotate-toggle.png" alt="Quick Button: Auto-Rotate" width="76" /> | <img src=".github/screenshots/bluetooth-toggle.png" alt="Quick Button: Bluetooth" width="76" /> |
+
+| Ringer Mode | Mute | Vibrate | Ring |
+| :---: | :---: | :---: | :---: |
+| <img src=".github/screenshots/ringer-toggle.png" alt="Quick Button: Ringer Mode" width="76" /> | <img src=".github/screenshots/mute-toggle.png" alt="Quick Button: Mute" width="76" /> | <img src=".github/screenshots/vibrate-toggle.png" alt="Quick Button: Vibrate" width="76" /> | <img src=".github/screenshots/ring-toggle.png" alt="Quick Button: Ring" width="76" /> |
+
+---
+
 ## 🛠 Tech Stack & Architecture
 
 - **Language:** Kotlin 2.3+ (`jvmToolchain(17)`)
