@@ -10,6 +10,7 @@ import dev.shiqan.materialwidgets.widget.calendar.DatePillAppWidgetReceiver
 import dev.shiqan.materialwidgets.widget.clock.AnalogClockAppWidgetReceiver
 import dev.shiqan.materialwidgets.widget.clock.ClockAppWidgetReceiver
 import dev.shiqan.materialwidgets.widget.clock.ClockBatteryPillAppWidgetReceiver
+import dev.shiqan.materialwidgets.widget.clock.VerticalClockPillAppWidgetReceiver
 import dev.shiqan.materialwidgets.widget.music.MusicAppWidgetReceiver
 import dev.shiqan.materialwidgets.widget.music.MusicPillAppWidgetReceiver
 import dev.shiqan.materialwidgets.widget.system.BatteryAppWidgetReceiver
@@ -40,6 +41,7 @@ class WidgetPreviewRegistryTest {
     private val expectedReceivers: Set<Class<out GlanceAppWidgetReceiver>> = setOf(
         ClockAppWidgetReceiver::class.java,
         ClockBatteryPillAppWidgetReceiver::class.java,
+        VerticalClockPillAppWidgetReceiver::class.java,
         AnalogClockAppWidgetReceiver::class.java,
         CalendarCardAppWidgetReceiver::class.java,
         DateClockPillAppWidgetReceiver::class.java,

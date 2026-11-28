@@ -42,6 +42,8 @@
     <string name="weather_tilted_pill_reverse_widget_description">Pixel-style 45° reverse-tilted rounded pill with current weather icon and temperature</string>
     <string name="clock_battery_pill_widget_name">Material You Clock &amp; Battery Pill</string>
     <string name="clock_battery_pill_widget_description">Stadium pill digital clock with date header and live battery percentage</string>
+    <string name="vertical_clock_pill_widget_name">Material You Vertical Clock Pill</string>
+    <string name="vertical_clock_pill_widget_description">Vertical rounded pill clock with oversized time breaking the top and date at the bottom</string>
     <string name="date_clock_pill_widget_name">Material You Date &amp; Clock Pill</string>
     <string name="date_clock_pill_widget_description">4x1 stadium pill with full date, month/year, and dual scalloped hour &amp; minute badges</string>
     <string name="date_pill_widget_name">Material You Date Pill</string>

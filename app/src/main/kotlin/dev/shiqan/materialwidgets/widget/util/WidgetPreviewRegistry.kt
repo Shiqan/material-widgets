@@ -24,6 +24,8 @@ import dev.shiqan.materialwidgets.widget.clock.ClockAppWidget
 import dev.shiqan.materialwidgets.widget.clock.ClockAppWidgetReceiver
 import dev.shiqan.materialwidgets.widget.clock.ClockBatteryPillAppWidget
 import dev.shiqan.materialwidgets.widget.clock.ClockBatteryPillAppWidgetReceiver
+import dev.shiqan.materialwidgets.widget.clock.VerticalClockPillAppWidget
+import dev.shiqan.materialwidgets.widget.clock.VerticalClockPillAppWidgetReceiver
 import dev.shiqan.materialwidgets.widget.music.MusicAppWidget
 import dev.shiqan.materialwidgets.widget.music.MusicAppWidgetReceiver
 import dev.shiqan.materialwidgets.widget.music.MusicPillAppWidget
@@ -76,6 +78,7 @@ object WidgetPreviewRegistry {
     val specs: List<WidgetPreviewSpec> = listOf(
         WidgetPreviewSpec(ClockAppWidgetReceiver::class.java, DpSize(160.dp, 160.dp)) { ClockAppWidget() },
         WidgetPreviewSpec(ClockBatteryPillAppWidgetReceiver::class.java, DpSize(240.dp, 140.dp)) { ClockBatteryPillAppWidget() },
+        WidgetPreviewSpec(VerticalClockPillAppWidgetReceiver::class.java, DpSize(160.dp, 160.dp)) { VerticalClockPillAppWidget() },
         WidgetPreviewSpec(AnalogClockAppWidgetReceiver::class.java, DpSize(160.dp, 160.dp)) { AnalogClockAppWidget() },
         WidgetPreviewSpec(CalendarCardAppWidgetReceiver::class.java, DpSize(160.dp, 160.dp)) { CalendarCardAppWidget() },
         WidgetPreviewSpec(DateClockPillAppWidgetReceiver::class.java, DpSize(320.dp, 76.dp)) { DateClockPillAppWidget() },

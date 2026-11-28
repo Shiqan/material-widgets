@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <FrameLayout
+        android:layout_width="90dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:background="@drawable/bg_widget_card_28"
+        android:backgroundTint="@color/widget_preview_secondary_container"
+        android:paddingHorizontal="8dp"
+        android:paddingVertical="18dp">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|center_horizontal"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <TextClock
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:format12Hour="EEE"
+                android:format24Hour="EEE"
+                android:includeFontPadding="false"
+                android:singleLine="true"
+                android:textColor="@color/widget_preview_primary"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+
+            <TextClock
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:format12Hour="MMM d"
+                android:format24Hour="MMM d"
+                android:includeFontPadding="false"
+                android:singleLine="true"
+                android:textColor="@color/widget_preview_on_secondary_container"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+    </FrameLayout>
+
+    <TextClock
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|center_horizontal"
+        android:layout_marginTop="24dp"
+        android:format12Hour="h:mm"
+        android:format24Hour="HH:mm"
+        android:includeFontPadding="false"
+        android:singleLine="true"
+        android:textColor="@color/widget_preview_on_secondary_container"
+        android:textSize="46sp"
+        android:textStyle="bold" />
+</FrameLayout>

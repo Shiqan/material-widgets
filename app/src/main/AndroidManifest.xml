@@ -291,6 +291,18 @@
         </receiver>
 
         <receiver
+            android:name=".widget.clock.VerticalClockPillAppWidgetReceiver"
+            android:exported="true"
+            android:label="@string/vertical_clock_pill_widget_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/vertical_clock_pill_widget_info" />
+        </receiver>
+
+        <receiver
             android:name=".widget.clock.AnalogClockAppWidgetReceiver"
             android:exported="true"
             android:label="@string/analog_clock_widget_name">

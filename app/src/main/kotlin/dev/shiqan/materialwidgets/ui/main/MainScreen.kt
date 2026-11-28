@@ -99,6 +99,7 @@ import dev.shiqan.materialwidgets.widget.calendar.DatePillAppWidgetReceiver
 import dev.shiqan.materialwidgets.widget.clock.AnalogClockAppWidgetReceiver
 import dev.shiqan.materialwidgets.widget.clock.ClockAppWidgetReceiver
 import dev.shiqan.materialwidgets.widget.clock.ClockBatteryPillAppWidgetReceiver
+import dev.shiqan.materialwidgets.widget.clock.VerticalClockPillAppWidgetReceiver
 import dev.shiqan.materialwidgets.widget.music.MediaSessionControllerHelper
 import dev.shiqan.materialwidgets.widget.music.MusicAppWidgetReceiver
 import dev.shiqan.materialwidgets.widget.music.MusicPillAppWidgetReceiver
@@ -235,6 +236,17 @@ internal fun MainScreen(data: List<String>, modifier: Modifier = Modifier) {
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                     onPinClick = { pinWidget(ClockBatteryPillAppWidgetReceiver::class.java) },
+                )
+            }
+
+            item {
+                WidgetGalleryCard(
+                    title = stringResource(R.string.vertical_clock_pill_widget_name),
+                    subtitle = "Vertical Pill (2x2) • Oversized Time Breaking Top & Date at Bottom",
+                    icon = Icons.Rounded.AccessTime,
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    onPinClick = { pinWidget(VerticalClockPillAppWidgetReceiver::class.java) },
                 )
             }
 
